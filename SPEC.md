@@ -304,7 +304,7 @@ Later:
 Build ONE step at a time. Each step should end with something the user can
 see working in the browser. The user commits after each step.
 
-- [ ] 1. Project skeleton: folders, index.html, style.css, config.js, and an
+- [x] 1. Project skeleton: folders, index.html, style.css, config.js, and an
          empty board drawn on screen in the right colours.
 - [ ] 2. Add chess.js and piece images. Show the starting position.
          Tap-to-move with highlights and legal-move dots.
