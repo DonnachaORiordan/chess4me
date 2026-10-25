@@ -232,6 +232,47 @@ function showSuccessTick() {
   boardState.element.appendChild(tick);
 }
 
+// ===== Pawn promotion =====
+
+// Shows a small panel over the board with a queen, rook, bishop and knight to choose from.
+// "moves" are the four possible promotion moves (one per piece).
+// Tapping a piece makes that move; tapping outside the panel cancels.
+function showPromotionChoice(moves) {
+  const colour = moves[0].color; // "w" or "b"
+
+  // A see-through dark layer covering the board, with the panel in the middle.
+  const overlay = document.createElement("div");
+  overlay.className = "promotion-overlay";
+  const panel = document.createElement("div");
+  panel.className = "promotion-panel";
+  overlay.appendChild(panel);
+
+  ["q", "r", "b", "n"].forEach(function (type) {
+    const move = moves.find(function (m) { return m.promotion === type; });
+    const button = document.createElement("button");
+    button.className = "promotion-choice";
+    const img = document.createElement("img");
+    img.src = "assets/pieces/" + colour + type.toUpperCase() + ".svg";
+    img.alt = PIECE_NAMES[type];
+    button.appendChild(img);
+
+    button.addEventListener("click", function (event) {
+      event.stopPropagation(); // this tap is handled here, not by the board
+      overlay.remove();
+      if (boardState.onMove) boardState.onMove(move);
+    });
+    panel.appendChild(button);
+  });
+
+  // Tapping the dark layer (outside the panel) cancels: the pawn stays where it was.
+  overlay.addEventListener("click", function (event) {
+    event.stopPropagation();
+    if (event.target === overlay) overlay.remove();
+  });
+
+  boardState.element.appendChild(overlay);
+}
+
 // ===== Taps =====
 
 // Runs whenever the user taps (or clicks) anywhere on the board.
@@ -249,14 +290,18 @@ function handleBoardTap(event) {
   // 1. A piece is selected and the tapped square is one of its legal moves:
   //    hand the move to onMove, which decides what happens.
   if (selected) {
-    const move = game.moves({ square: selected, verbose: true }).find(function (m) {
-      // Promotion always picks a queen for now (the proper choice comes in a later step).
-      return m.to === tapped && (!m.promotion || m.promotion === "q");
+    const moves = game.moves({ square: selected, verbose: true }).filter(function (m) {
+      return m.to === tapped;
     });
-    if (move) {
+    if (moves.length > 0) {
       boardState.selected = null;
       updateBoard();
-      if (boardState.onMove) boardState.onMove(move);
+      if (moves[0].promotion) {
+        // A pawn reaching the last row: there's one move per piece it can become, so ask which.
+        showPromotionChoice(moves);
+      } else if (boardState.onMove) {
+        boardState.onMove(moves[0]);
+      }
       return;
     }
   }

@@ -13,6 +13,8 @@
   --move-dot: rgba(0, 0, 0, 0.15); /* legal-move dots and capture rings */
   --card: #ffffff;          /* course card background */
   --hint: #f0a830;          /* orange ring around the piece to move (Hint button) */
+  --danger: #c0392b;        /* red, for buttons that delete or discard */
+  --border: #cccccc;        /* light grey edges of text boxes and options */
 }
 
 /* Anything with the "hidden" attribute (e.g. screens not being shown) stays hidden */
@@ -68,6 +70,26 @@ h2 {
 .button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+/* A quieter button: white with a green edge (e.g. Cancel, Undo) */
+.button-secondary {
+  background-color: var(--card);
+  color: var(--green);
+  box-shadow: inset 0 0 0 2px var(--green);
+}
+
+.button-secondary:hover:not(:disabled) {
+  background-color: #eef3ef;
+}
+
+/* A red button for actions that delete or discard things */
+.button-danger {
+  background-color: var(--danger);
+}
+
+.button-danger:hover:not(:disabled) {
+  background-color: #a93226;
 }
 
 /* A row of buttons that wraps onto a new line on narrow screens */
@@ -280,6 +302,195 @@ h2 {
 
 .move-number {
   color: #888888;
+}
+
+/* ===== Course editor ===== */
+
+/* A form field: label above, input below */
+.field {
+  max-width: 600px; /* text boxes don't stretch too wide on a laptop */
+  margin-bottom: 16px;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+
+/* Text boxes. Font size 16px stops iPhones zooming in when you tap them. */
+.text-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background-color: var(--card);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 16px;
+}
+
+.text-input:focus {
+  outline: 2px solid var(--green);
+  border-color: var(--green);
+}
+
+/* The White / Black choice */
+.colour-choice {
+  display: flex;
+  gap: 10px;
+}
+
+.colour-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background-color: var(--card);
+  cursor: pointer;
+}
+
+.colour-option input {
+  accent-color: var(--green); /* green radio button */
+  margin: 0;
+}
+
+/* Moves in the editor's move list are buttons (tap to comment) */
+.move-list {
+  align-items: center;
+}
+
+.move-button {
+  min-height: 44px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: 16px;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.move-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.move-button.selected {
+  background-color: var(--selected-light);
+}
+
+/* A small green dot after a move that has a comment */
+.move-button.has-comment::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background-color: var(--green);
+  vertical-align: middle;
+}
+
+/* Small grey help text */
+.help-text {
+  margin: 8px 0 0;
+  color: #888888;
+  font-size: 14px;
+}
+
+/* The comment box for the tapped move */
+.comment-panel {
+  margin-top: 16px;
+}
+
+.comment-panel textarea {
+  resize: vertical;
+  margin-bottom: 10px;
+}
+
+/* Red message, e.g. "Please enter a course name." */
+.error-text {
+  min-height: 1.2em;
+  color: var(--danger);
+}
+
+/* ===== Pawn promotion choice ===== */
+
+/* A see-through dark layer over the board */
+.promotion-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.35);
+}
+
+/* The white panel with the four pieces */
+.promotion-panel {
+  display: flex;
+  gap: 6px;
+  width: 60%;
+  padding: 8px;
+  border-radius: 10px;
+  background-color: var(--card);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.promotion-choice {
+  flex: 1;
+  aspect-ratio: 1 / 1;
+  padding: 4px;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--square-light);
+  cursor: pointer;
+}
+
+.promotion-choice:hover {
+  background-color: var(--selected-light);
+}
+
+.promotion-choice img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ===== "Are you sure?" pop-up ===== */
+.dialog {
+  width: calc(100% - 32px);
+  max-width: 360px;
+  padding: 20px;
+  border: none;
+  border-radius: 12px;
+  background-color: var(--card);
+  color: var(--text);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+/* The dark layer behind the pop-up */
+.dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.dialog p {
+  margin-top: 0;
+  font-size: 17px;
+}
+
+.dialog .button-row {
+  justify-content: flex-end;
 }
 
 /* ===== Board =====

@@ -23,15 +23,24 @@ function colourName(colour) {
 }
 
 // Shows a list of moves (e.g. ["e4", "e5", "Nf3"]) in the move list with the given id,
-// laid out as "1. e4 e5  2. Nf3". Used by practice and watch mode.
-function renderMoveList(listId, moves) {
+// laid out as "1. e4 e5  2. Nf3". Used by practice, watch mode and the editor.
+// "options" is only used by the editor, to make the moves tappable:
+//   options.onMoveTap(index)  - called when a move is tapped (0 = first move)
+//   options.selectedIndex     - the move to highlight
+//   options.hasComment(index) - true if the move should show a comment dot
+function renderMoveList(listId, moves, options) {
+  options = options || {};
   const list = document.getElementById(listId);
   list.innerHTML = "";
 
   for (let i = 0; i < moves.length; i += 2) {
     addMoveListCell(list, (i / 2 + 1) + ".", "move-number"); // move number
-    addMoveListCell(list, moves[i], "move");                 // White's move
-    addMoveListCell(list, moves[i + 1] || "", "move");       // Black's move (if played yet)
+    addMoveListMove(list, moves, i, options);                // White's move
+    if (i + 1 < moves.length) {
+      addMoveListMove(list, moves, i + 1, options);          // Black's move
+    } else {
+      addMoveListCell(list, "", "move");                     // Black hasn't moved yet
+    }
   }
 }
 
@@ -42,6 +51,49 @@ function addMoveListCell(list, text, className) {
   cell.textContent = text;
   list.appendChild(cell);
 }
+
+// Adds one move to a move list grid: plain text, or a button if moves can be tapped.
+function addMoveListMove(list, moves, index, options) {
+  if (!options.onMoveTap) {
+    addMoveListCell(list, moves[index], "move");
+    return;
+  }
+
+  const button = document.createElement("button");
+  button.className = "move-button";
+  button.textContent = moves[index];
+  if (index === options.selectedIndex) button.classList.add("selected");
+  if (options.hasComment && options.hasComment(index)) button.classList.add("has-comment");
+  button.addEventListener("click", function () {
+    options.onMoveTap(index);
+  });
+  list.appendChild(button);
+}
+
+// ===== "Are you sure?" pop-up =====
+
+// The function to run if the user confirms (set by askConfirm).
+let confirmAction = null;
+
+// Shows a pop-up with a message and two buttons: yesLabel (e.g. "Delete") and "Cancel".
+// Runs onYes only if the user taps the yes button.
+function askConfirm(message, yesLabel, onYes) {
+  document.getElementById("confirm-message").textContent = message;
+  document.getElementById("confirm-yes").textContent = yesLabel;
+  confirmAction = onYes;
+  document.getElementById("confirm-dialog").showModal();
+}
+
+document.getElementById("confirm-yes").addEventListener("click", function () {
+  document.getElementById("confirm-dialog").close();
+  if (confirmAction) confirmAction();
+  confirmAction = null;
+});
+
+document.getElementById("confirm-no").addEventListener("click", function () {
+  document.getElementById("confirm-dialog").close();
+  confirmAction = null;
+});
 
 // Shows a move's comment in the comment box with the given id,
 // or hides the box if there's no comment. Used by practice and watch mode.
@@ -131,6 +183,26 @@ document.getElementById("course-practice").addEventListener("click", function ()
 // "Watch": watch this course's line being played (see watch.js).
 document.getElementById("course-watch").addEventListener("click", function () {
   startWatch(currentCourseId);
+});
+
+// "Edit": open this course in the editor (see editor.js).
+document.getElementById("course-edit").addEventListener("click", function () {
+  startEditor(currentCourseId);
+});
+
+// "Delete": asks first, then deletes the course and returns to the main menu.
+document.getElementById("course-delete").addEventListener("click", function () {
+  const course = getCourse(currentCourseId);
+  if (!course) return;
+  askConfirm("Delete " + course.name + "? This can't be undone.", "Delete", function () {
+    deleteCourse(course.id);
+    showMainMenu();
+  });
+});
+
+// "New course" on the main menu: open an empty editor.
+document.getElementById("menu-new").addEventListener("click", function () {
+  startEditor(null);
 });
 
 // ===== Start the app =====

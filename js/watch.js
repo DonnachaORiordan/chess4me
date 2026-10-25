@@ -38,18 +38,6 @@ function resetWatchPosition() {
   updateWatchView();
 }
 
-// Turns a move tree into a simple list of moves, following the first choice at each step.
-// (In version 1 there is only one choice at each step anyway.)
-function getMainLine(moves) {
-  const line = [];
-  let nextMoves = moves;
-  while (nextMoves.length > 0) {
-    line.push(nextMoves[0]);
-    nextMoves = nextMoves[0].children;
-  }
-  return line;
-}
-
 // Plays the next move of the line, if there is one.
 function watchForward() {
   if (watchState.index >= watchState.line.length) return;

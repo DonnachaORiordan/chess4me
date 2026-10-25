@@ -20,10 +20,10 @@
     <!-- The course cards: app.js fills this in from the saved courses -->
     <div id="course-list" class="course-list"></div>
 
-    <!-- New course, Export and Import are greyed out ("disabled") until the steps that make them work.
+    <!-- Export and Import are greyed out ("disabled") until the step that makes them work.
          Sound buttons ("sound-toggle") get their text from sounds.js. -->
     <div class="button-row">
-      <button id="menu-new" class="button" disabled>New course</button>
+      <button id="menu-new" class="button">New course</button>
       <button id="menu-export" class="button" disabled>Export</button>
       <button id="menu-import" class="button" disabled>Import</button>
       <button id="menu-sound" class="button sound-toggle">Sound: on</button>
@@ -38,12 +38,11 @@
     <h2 id="course-name"></h2>
     <p id="course-colour" class="course-colour"></p>
 
-    <!-- Edit and Delete are greyed out ("disabled") until the step that makes them work -->
     <div class="button-row">
       <button id="course-practice" class="button">Practice</button>
       <button id="course-watch" class="button">Watch</button>
-      <button id="course-edit" class="button" disabled>Edit</button>
-      <button id="course-delete" class="button" disabled>Delete</button>
+      <button id="course-edit" class="button">Edit</button>
+      <button id="course-delete" class="button button-secondary">Delete</button>
     </div>
   </section>
 
@@ -126,9 +125,81 @@
     </div>
   </section>
 
+  <!-- ===== Course editor (new course, or editing one) ===== -->
+  <section id="editor-screen" class="screen" hidden>
+    <!-- "New course" or "Edit course" (filled in by editor.js) -->
+    <h2 id="editor-title"></h2>
+
+    <!-- Course name and colour -->
+    <div class="field">
+      <label for="editor-name" class="field-label">Course name</label>
+      <input id="editor-name" class="text-input" type="text" maxlength="60" autocomplete="off">
+    </div>
+
+    <div class="field">
+      <span class="field-label">You play</span>
+      <div class="colour-choice">
+        <label class="colour-option">
+          <input type="radio" name="editor-colour" value="white">
+          <span class="colour-box colour-box-white"></span> White
+        </label>
+        <label class="colour-option">
+          <input type="radio" name="editor-colour" value="black">
+          <span class="colour-box colour-box-black"></span> Black
+        </label>
+      </div>
+    </div>
+
+    <!-- Same layout as practice mode -->
+    <div class="practice-layout">
+      <div id="editor-board-area" class="board-area">
+        <!-- The board is moved here by editor.js -->
+      </div>
+
+      <div class="side-panel">
+        <!-- "White to move" / "Black to move" (filled in by editor.js) -->
+        <p id="editor-status" class="status"></p>
+
+        <div class="button-row button-row-tight">
+          <button id="editor-undo" class="button button-secondary">Undo last move</button>
+        </div>
+
+        <!-- The moves entered so far: tap one to add a comment (filled in by editor.js) -->
+        <div id="editor-move-list" class="move-list"></div>
+        <p id="editor-help" class="help-text">Tap a move to add a comment.</p>
+
+        <!-- Comment box for the tapped move (shown when a move is tapped) -->
+        <div id="editor-comment-panel" class="comment-panel" hidden>
+          <label for="editor-comment" id="editor-comment-label" class="field-label"></label>
+          <textarea id="editor-comment" class="text-input" rows="3" maxlength="500"></textarea>
+          <div class="button-row button-row-tight">
+            <button id="editor-comment-delete" class="button button-secondary">Delete comment</button>
+            <button id="editor-comment-done" class="button">Done</button>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button id="editor-save" class="button">Save</button>
+          <button id="editor-cancel" class="button button-secondary">Cancel</button>
+        </div>
+        <!-- e.g. "Please enter a course name." (filled in by editor.js) -->
+        <p id="editor-message" class="error-text"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== "Are you sure?" pop-up (used by askConfirm in app.js) ===== -->
+  <dialog id="confirm-dialog" class="dialog">
+    <p id="confirm-message"></p>
+    <div class="button-row">
+      <button id="confirm-yes" class="button button-danger">OK</button>
+      <button id="confirm-no" class="button button-secondary">Cancel</button>
+    </div>
+  </dialog>
+
   <!-- Classic script tags (not modules) so the page works by double-clicking index.html.
        Order matters: the chess.js library, config, storage and sounds first, then the board,
-       practice and watch code, then the app that uses them. -->
+       practice, watch and editor code, then the app that uses them. -->
   <script src="lib/chess.js"></script>
   <script src="js/config.js"></script>
   <script src="js/storage.js"></script>
@@ -136,6 +207,7 @@
   <script src="js/board.js"></script>
   <script src="js/practice.js"></script>
   <script src="js/watch.js"></script>
+  <script src="js/editor.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
