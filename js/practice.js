@@ -32,10 +32,11 @@ function startPractice(courseId) {
   document.getElementById("practice-title").textContent = course.name;
   document.getElementById("practice-end").hidden = true;
   document.getElementById("practice-controls").hidden = false;
-  showPracticeComment("");
-  renderMoveList();
+  showComment("practice-comment", "");
+  renderMoveList("practice-move-list", practiceState.played);
 
   // Show the board with the user's colour at the bottom.
+  placeBoard(document.getElementById("practice-board-area"));
   showGame(practiceState.game, {
     orientation: course.colour,
     playerColour: practiceState.userColour,
@@ -131,8 +132,8 @@ function acceptMove(node, move) {
   clearHint();
   showMove(move);
   playMoveSound();
-  showPracticeComment(node.comment); // shows the move's comment, or hides the box if it has none
-  renderMoveList();
+  showComment("practice-comment", node.comment); // or hides the box if the move has no comment
+  renderMoveList("practice-move-list", practiceState.played);
   continuePractice();
 }
 
@@ -182,13 +183,6 @@ function setHelpButtonsEnabled(enabled) {
   document.getElementById("practice-show").disabled = !enabled;
 }
 
-// Shows a move's comment in the box below the board, or hides the box if there's no comment.
-function showPracticeComment(text) {
-  const box = document.getElementById("practice-comment");
-  box.textContent = text || "";
-  box.hidden = !text;
-}
-
 // True if two moves are the same, ignoring check (+) and mate (#) signs.
 // E.g. "Bb5+" and "Bb5" are treated as the same move.
 function sameMove(a, b) {
@@ -198,27 +192,6 @@ function sameMove(a, b) {
 // Shows a short message above the move list.
 function setPracticeStatus(text) {
   document.getElementById("practice-status").textContent = text;
-}
-
-// Shows the moves played so far, e.g. "1. e4 e5  2. Nf3 Nc6".
-function renderMoveList() {
-  const list = document.getElementById("move-list");
-  list.innerHTML = "";
-
-  const played = practiceState.played;
-  for (let i = 0; i < played.length; i += 2) {
-    addMoveListCell(list, (i / 2 + 1) + ".", "move-number"); // move number
-    addMoveListCell(list, played[i], "move");                // White's move
-    addMoveListCell(list, played[i + 1] || "", "move");      // Black's move (if played yet)
-  }
-}
-
-// Adds one piece of text to the move list grid.
-function addMoveListCell(list, text, className) {
-  const cell = document.createElement("span");
-  cell.className = className;
-  cell.textContent = text;
-  list.appendChild(cell);
 }
 
 // ===== Buttons on the practice screen =====

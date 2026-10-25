@@ -38,10 +38,10 @@
     <h2 id="course-name"></h2>
     <p id="course-colour" class="course-colour"></p>
 
-    <!-- Watch, Edit and Delete are greyed out ("disabled") until the steps that make them work -->
+    <!-- Edit and Delete are greyed out ("disabled") until the step that makes them work -->
     <div class="button-row">
       <button id="course-practice" class="button">Practice</button>
-      <button id="course-watch" class="button" disabled>Watch</button>
+      <button id="course-watch" class="button">Watch</button>
       <button id="course-edit" class="button" disabled>Edit</button>
       <button id="course-delete" class="button" disabled>Delete</button>
     </div>
@@ -59,8 +59,9 @@
     <!-- Board on the left and the side panel on the right on wide screens;
          the side panel goes below the board on narrow screens (phones). -->
     <div class="practice-layout">
-      <div class="board-area">
-        <!-- The chessboard: board.js fills this with 64 squares -->
+      <div id="practice-board-area" class="board-area">
+        <!-- The chessboard: board.js fills this with 64 squares.
+             There is only one board: watch mode moves it onto its own screen. -->
         <div id="board" class="board"></div>
 
         <!-- The comment for the last move, if it has one (filled in by practice.js) -->
@@ -78,7 +79,7 @@
         </div>
 
         <!-- The moves played so far (filled in by practice.js) -->
-        <div id="move-list" class="move-list"></div>
+        <div id="practice-move-list" class="move-list"></div>
 
         <!-- Shown at the end of the line -->
         <div id="practice-end" class="button-row" hidden>
@@ -89,15 +90,52 @@
     </div>
   </section>
 
+  <!-- ===== Watch mode ===== -->
+  <section id="watch-screen" class="screen" hidden>
+    <!-- Back on the left, sound on/off on the right -->
+    <div class="top-bar">
+      <button id="watch-exit" class="back-button">&larr; Back</button>
+      <button id="watch-sound" class="back-button sound-toggle">Sound: on</button>
+    </div>
+    <h2 id="watch-title"></h2>
+
+    <!-- Same layout as practice mode -->
+    <div class="practice-layout">
+      <div id="watch-board-area" class="board-area">
+        <!-- The board is moved here by watch.js -->
+
+        <!-- The comment for the last move, if it has one (filled in by watch.js) -->
+        <div id="watch-comment" class="comment-box" hidden></div>
+      </div>
+
+      <div class="side-panel">
+        <!-- e.g. "Start position" or "End of the line" (filled in by watch.js) -->
+        <p id="watch-status" class="status"></p>
+
+        <!-- Back one move, Play/Pause, Forward one move, Restart -->
+        <div class="button-row button-row-tight">
+          <button id="watch-back" class="button arrow-button" aria-label="Back one move" title="Back one move">&lsaquo;</button>
+          <button id="watch-play" class="button">Play</button>
+          <button id="watch-forward" class="button arrow-button" aria-label="Forward one move" title="Forward one move">&rsaquo;</button>
+          <button id="watch-restart" class="button">Restart</button>
+        </div>
+
+        <!-- The moves played so far (filled in by watch.js) -->
+        <div id="watch-move-list" class="move-list"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- Classic script tags (not modules) so the page works by double-clicking index.html.
-       Order matters: the chess.js library, config, storage and sounds first, then the board
-       and practice code, then the app that uses them. -->
+       Order matters: the chess.js library, config, storage and sounds first, then the board,
+       practice and watch code, then the app that uses them. -->
   <script src="lib/chess.js"></script>
   <script src="js/config.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/sounds.js"></script>
   <script src="js/board.js"></script>
   <script src="js/practice.js"></script>
+  <script src="js/watch.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

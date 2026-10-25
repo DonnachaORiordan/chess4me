@@ -83,6 +83,14 @@ h2 {
   margin: 0 0 16px;
 }
 
+/* Square-ish buttons showing a big arrow (watch mode's back/forward one move) */
+.arrow-button {
+  min-width: 52px;
+  padding: 0 12px;
+  font-size: 28px;
+  line-height: 1;
+}
+
 /* The plain "← Back" link-style button at the top of a screen */
 .back-button {
   min-height: 44px;

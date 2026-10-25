@@ -22,6 +22,35 @@ function colourName(colour) {
   return colour === "white" ? "White" : "Black";
 }
 
+// Shows a list of moves (e.g. ["e4", "e5", "Nf3"]) in the move list with the given id,
+// laid out as "1. e4 e5  2. Nf3". Used by practice and watch mode.
+function renderMoveList(listId, moves) {
+  const list = document.getElementById(listId);
+  list.innerHTML = "";
+
+  for (let i = 0; i < moves.length; i += 2) {
+    addMoveListCell(list, (i / 2 + 1) + ".", "move-number"); // move number
+    addMoveListCell(list, moves[i], "move");                 // White's move
+    addMoveListCell(list, moves[i + 1] || "", "move");       // Black's move (if played yet)
+  }
+}
+
+// Adds one piece of text to a move list grid.
+function addMoveListCell(list, text, className) {
+  const cell = document.createElement("span");
+  cell.className = className;
+  cell.textContent = text;
+  list.appendChild(cell);
+}
+
+// Shows a move's comment in the comment box with the given id,
+// or hides the box if there's no comment. Used by practice and watch mode.
+function showComment(boxId, text) {
+  const box = document.getElementById(boxId);
+  box.textContent = text || "";
+  box.hidden = !text;
+}
+
 // ===== Main menu =====
 
 // Shows the main menu, with an up-to-date list of courses.
@@ -97,6 +126,11 @@ document.getElementById("course-back").addEventListener("click", showMainMenu);
 // "Practice": start practising this course (see practice.js).
 document.getElementById("course-practice").addEventListener("click", function () {
   startPractice(currentCourseId);
+});
+
+// "Watch": watch this course's line being played (see watch.js).
+document.getElementById("course-watch").addEventListener("click", function () {
+  startWatch(currentCourseId);
 });
 
 // ===== Start the app =====

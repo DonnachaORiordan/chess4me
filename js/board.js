@@ -62,6 +62,12 @@ function setupBoard(boardElement) {
   boardElement.addEventListener("click", handleBoardTap);
 }
 
+// Moves the board onto a different screen: puts it at the top of the given element.
+// (There is only one board; practice and watch mode each move it into their own screen.)
+function placeBoard(container) {
+  container.prepend(boardState.element);
+}
+
 // Shows a chess.js game on the board.
 // options.orientation:  "white" or "black" (the colour at the bottom)
 // options.playerColour: "w" or "b" (the only side the user may move), or null

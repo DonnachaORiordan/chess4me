@@ -314,8 +314,8 @@ see working in the browser. The user commits after each step.
          board flipping, end of line.
 - [x] 6. Feedback: red X, green tick, slide animations, sounds, mute toggle.
 - [x] 7. Hint and Show move buttons. Comments shown during practice.
-- [ ] 8. Put it online with GitHub Pages so it can be tested on the iPhone.
-- [ ] 9. Watch mode.
+- [x] 8. Put it online with GitHub Pages so it can be tested on the iPhone.
+- [x] 9. Watch mode.
 - [ ] 10. Course editor: new course, edit, delete, comments, promotion.
 - [ ] 11. Performance stats and the summary on menu cards.
 - [ ] 12. Export and import.
