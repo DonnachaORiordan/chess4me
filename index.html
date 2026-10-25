@@ -9,11 +9,49 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <!-- App name heading (text filled in by app.js) -->
-  <h1 id="app-title"></h1>
+  <!-- The app has several "screens". Only one is shown at a time (app.js switches
+       between them by adding/removing the "hidden" attribute). -->
 
-  <!-- The chessboard: board.js fills this with 64 squares -->
-  <div id="board" class="board"></div>
+  <!-- ===== Main menu ===== -->
+  <section id="menu-screen" class="screen">
+    <!-- App name heading (text filled in by app.js) -->
+    <h1 id="app-title"></h1>
+
+    <!-- The course cards: app.js fills this in from the saved courses -->
+    <div id="course-list" class="course-list"></div>
+
+    <!-- Greyed out ("disabled") until the steps that make them work -->
+    <div class="button-row">
+      <button id="menu-new" class="button" disabled>New course</button>
+      <button id="menu-export" class="button" disabled>Export</button>
+      <button id="menu-import" class="button" disabled>Import</button>
+      <button id="menu-sound" class="button" disabled>Sound: on</button>
+    </div>
+  </section>
+
+  <!-- ===== Course page ===== -->
+  <section id="course-screen" class="screen" hidden>
+    <button id="course-back" class="back-button">&larr; Back</button>
+
+    <!-- Course name and colour (filled in by app.js) -->
+    <h2 id="course-name"></h2>
+    <p id="course-colour" class="course-colour"></p>
+
+    <!-- Greyed out ("disabled") until the steps that make them work -->
+    <div class="button-row">
+      <button id="course-practice" class="button" disabled>Practice</button>
+      <button id="course-watch" class="button" disabled>Watch</button>
+      <button id="course-edit" class="button" disabled>Edit</button>
+      <button id="course-delete" class="button" disabled>Delete</button>
+    </div>
+  </section>
+
+  <!-- ===== Board screen =====
+       Not reachable yet: practice mode (step 5) will use it. -->
+  <section id="board-screen" class="screen" hidden>
+    <!-- The chessboard: board.js fills this with 64 squares -->
+    <div id="board" class="board"></div>
+  </section>
 
   <!-- Classic script tags (not modules) so the page works by double-clicking index.html.
        Order matters: the chess.js library, config and storage first, then the board code,
