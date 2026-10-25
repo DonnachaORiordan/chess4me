@@ -20,14 +20,16 @@
     <!-- The course cards: app.js fills this in from the saved courses -->
     <div id="course-list" class="course-list"></div>
 
-    <!-- Export and Import are greyed out ("disabled") until the step that makes them work.
-         Sound buttons ("sound-toggle") get their text from sounds.js. -->
+    <!-- Sound buttons ("sound-toggle") get their text from sounds.js -->
     <div class="button-row">
       <button id="menu-new" class="button">New course</button>
-      <button id="menu-export" class="button" disabled>Export</button>
-      <button id="menu-import" class="button" disabled>Import</button>
+      <button id="menu-export" class="button">Export</button>
+      <button id="menu-import" class="button">Import</button>
       <button id="menu-sound" class="button sound-toggle">Sound: on</button>
     </div>
+
+    <!-- Hidden file chooser, opened by the Import button (see backup.js) -->
+    <input id="import-file" type="file" accept="application/json,.json" hidden>
   </section>
 
   <!-- ===== Course page ===== -->
@@ -188,18 +190,16 @@
     </div>
   </section>
 
-  <!-- ===== "Are you sure?" pop-up (used by askConfirm in app.js) ===== -->
+  <!-- ===== Pop-up for questions and messages (used by askChoice in app.js) ===== -->
   <dialog id="confirm-dialog" class="dialog">
     <p id="confirm-message"></p>
-    <div class="button-row">
-      <button id="confirm-yes" class="button button-danger">OK</button>
-      <button id="confirm-no" class="button button-secondary">Cancel</button>
-    </div>
+    <!-- The buttons are added by askChoice -->
+    <div id="confirm-buttons" class="button-row"></div>
   </dialog>
 
   <!-- Classic script tags (not modules) so the page works by double-clicking index.html.
        Order matters: the chess.js library, config, storage and sounds first, then the board,
-       practice, watch and editor code, then the app that uses them. -->
+       practice, watch, editor and backup code, then the app that uses them. -->
   <script src="lib/chess.js"></script>
   <script src="js/config.js"></script>
   <script src="js/storage.js"></script>
@@ -208,6 +208,7 @@
   <script src="js/practice.js"></script>
   <script src="js/watch.js"></script>
   <script src="js/editor.js"></script>
+  <script src="js/backup.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

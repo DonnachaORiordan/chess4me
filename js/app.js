@@ -70,30 +70,46 @@ function addMoveListMove(list, moves, index, options) {
   list.appendChild(button);
 }
 
-// ===== "Are you sure?" pop-up =====
+// ===== Pop-up messages and questions =====
 
-// The function to run if the user confirms (set by askConfirm).
-let confirmAction = null;
-
-// Shows a pop-up with a message and two buttons: yesLabel (e.g. "Delete") and "Cancel".
-// Runs onYes only if the user taps the yes button.
-function askConfirm(message, yesLabel, onYes) {
+// Shows a pop-up with a message, a button for each choice, and a last button
+// that just closes it (labelled "Cancel" unless closeLabel says otherwise).
+// Each choice is { label: "Add", style: "button-danger" (optional), action: function }.
+function askChoice(message, choices, closeLabel) {
+  const dialog = document.getElementById("confirm-dialog");
   document.getElementById("confirm-message").textContent = message;
-  document.getElementById("confirm-yes").textContent = yesLabel;
-  confirmAction = onYes;
-  document.getElementById("confirm-dialog").showModal();
+
+  const buttons = document.getElementById("confirm-buttons");
+  buttons.innerHTML = "";
+  choices.forEach(function (choice) {
+    addDialogButton(buttons, choice.label, "button " + (choice.style || ""), choice.action);
+  });
+  addDialogButton(buttons, closeLabel || "Cancel", "button button-secondary", null);
+
+  dialog.showModal();
 }
 
-document.getElementById("confirm-yes").addEventListener("click", function () {
-  document.getElementById("confirm-dialog").close();
-  if (confirmAction) confirmAction();
-  confirmAction = null;
-});
+// Adds one button to the pop-up. Tapping it closes the pop-up, then runs the action (if any).
+function addDialogButton(container, label, className, action) {
+  const button = document.createElement("button");
+  button.className = className;
+  button.textContent = label;
+  button.addEventListener("click", function () {
+    document.getElementById("confirm-dialog").close();
+    if (action) action();
+  });
+  container.appendChild(button);
+}
 
-document.getElementById("confirm-no").addEventListener("click", function () {
-  document.getElementById("confirm-dialog").close();
-  confirmAction = null;
-});
+// Asks "Are you sure?": a red button (e.g. "Delete") and "Cancel". Runs onYes only if confirmed.
+function askConfirm(message, yesLabel, onYes) {
+  askChoice(message, [{ label: yesLabel, style: "button-danger", action: onYes }]);
+}
+
+// Shows a message with just an "OK" button.
+function showMessage(message) {
+  askChoice(message, [], "OK");
+}
 
 // Shows a move's comment in the comment box with the given id,
 // or hides the box if there's no comment. Used by practice and watch mode.

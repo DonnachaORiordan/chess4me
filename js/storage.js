@@ -8,6 +8,10 @@
 // Never change this, even if the app is renamed, or saved courses would be lost.
 const STORAGE_KEY = "chess4me-data";
 
+// A label written into backup files, so Import can recognise them.
+// Never change this, or older backups would no longer be accepted.
+const BACKUP_FORMAT = "chess4me-backup";
+
 // Version of the saved data format. Increase it if the format ever changes,
 // so old data can be recognised and upgraded safely.
 const DATA_VERSION = 1;
@@ -199,6 +203,95 @@ function deleteCourse(id) {
   data.courses = data.courses.filter(function (course) { return course.id !== id; });
   return writeData(data);
 }
+
+// ===== Backups (Export and Import) =====
+
+// Returns everything that goes into a backup file: all courses, with their stats.
+function getBackupData() {
+  return {
+    format: BACKUP_FORMAT,
+    dataVersion: DATA_VERSION,
+    exported: new Date().toISOString(),
+    courses: getAllCourses()
+  };
+}
+
+// Reads the text of a backup file and checks it carefully.
+// Returns the list of courses if it's a valid backup, or null if it isn't.
+function readBackup(text) {
+  let backup;
+  try {
+    backup = JSON.parse(text);
+  } catch (error) {
+    return null; // not even readable data
+  }
+
+  const isBackup = backup !== null && typeof backup === "object" &&
+    backup.format === BACKUP_FORMAT &&
+    typeof backup.dataVersion === "number" &&
+    backup.dataVersion <= DATA_VERSION && // made by a newer version of the app: can't be sure we understand it
+    Array.isArray(backup.courses);
+  if (!isBackup) return null;
+
+  if (!backup.courses.every(isValidCourse)) return null;
+  return backup.courses.map(tidyImportedCourse);
+}
+
+// True if something looks like a proper course (name, colour and a valid move tree).
+function isValidCourse(course) {
+  return course !== null && typeof course === "object" &&
+    typeof course.name === "string" && course.name.trim() !== "" &&
+    (course.colour === "white" || course.colour === "black") &&
+    Array.isArray(course.moves) &&
+    course.moves.every(isValidMoveNode);
+}
+
+// True if something looks like a proper move-tree node (and so do all the moves after it).
+function isValidMoveNode(node) {
+  return node !== null && typeof node === "object" &&
+    typeof node.move === "string" &&
+    (node.comment === undefined || typeof node.comment === "string") &&
+    Array.isArray(node.children) &&
+    node.children.every(isValidMoveNode);
+}
+
+// Fills in anything missing from an imported course (e.g. stats), so the rest of the app can rely on it.
+function tidyImportedCourse(course) {
+  const now = new Date().toISOString();
+  const stats = Object.assign(makeEmptyStats(), (course.stats && typeof course.stats === "object") ? course.stats : {});
+  if (!stats.moveMistakes || typeof stats.moveMistakes !== "object") stats.moveMistakes = {};
+
+  return {
+    id: (typeof course.id === "string" && course.id) ? course.id : makeCourseId(),
+    name: course.name.trim(),
+    colour: course.colour,
+    description: (typeof course.description === "string") ? course.description : "",
+    moves: course.moves,
+    stats: stats,
+    created: (typeof course.created === "string") ? course.created : now,
+    updated: (typeof course.updated === "string") ? course.updated : now
+  };
+}
+
+// Saves imported courses.
+// replace = true:  the imported courses replace ALL existing courses.
+// replace = false: they are added. A course whose id is already used gets a new id,
+//                  so it is added as a copy and never overwrites an existing course.
+function importCourses(courses, replace) {
+  const data = getData();
+  if (replace) {
+    data.courses = courses;
+  } else {
+    courses.forEach(function (course) {
+      const idTaken = data.courses.some(function (c) { return c.id === course.id; });
+      if (idTaken) course.id = makeCourseId();
+      data.courses.push(course);
+    });
+  }
+  return writeData(data);
+}
+
+// ===== User settings (e.g. sound on/off) =====
 
 // Returns the user's settings, e.g. { soundOn: true }.
 // Anything not saved yet uses the value from DEFAULT_SETTINGS.

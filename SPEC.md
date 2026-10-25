@@ -318,7 +318,7 @@ see working in the browser. The user commits after each step.
 - [x] 9. Watch mode.
 - [x] 10. Course editor: new course, edit, delete, comments, promotion.
 - [x] 11. Performance stats and the summary on menu cards.
-- [ ] 12. Export and import.
+- [x] 12. Export and import.
 - [ ] 13. App icon, manifest and iPhone home-screen tags.
 - [ ] 14. Offline support (service worker).
 - [ ] 15. Polish pass on the iPhone: spacing, tap sizes, smoothness.
