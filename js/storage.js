@@ -12,6 +12,11 @@ const STORAGE_KEY = "chess4me-data";
 // so old data can be recognised and upgraded safely.
 const DATA_VERSION = 1;
 
+// Settings used until the user changes them.
+const DEFAULT_SETTINGS = {
+  soundOn: true
+};
+
 // Set to true if the saved data couldn't be read. Saving is then blocked,
 // so broken (but maybe recoverable) data is never overwritten.
 let storageBroken = false;
@@ -170,5 +175,18 @@ function saveCourse(course) {
 function deleteCourse(id) {
   const data = getData();
   data.courses = data.courses.filter(function (course) { return course.id !== id; });
+  return writeData(data);
+}
+
+// Returns the user's settings, e.g. { soundOn: true }.
+// Anything not saved yet uses the value from DEFAULT_SETTINGS.
+function getSettings() {
+  return Object.assign({}, DEFAULT_SETTINGS, getData().settings);
+}
+
+// Saves the user's settings.
+function saveSettings(settings) {
+  const data = getData();
+  data.settings = settings;
   return writeData(data);
 }

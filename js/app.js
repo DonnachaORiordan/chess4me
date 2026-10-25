@@ -108,6 +108,9 @@ document.getElementById("app-title").textContent = APP_NAME;
 // Prepare saved data (creates the example course on first launch).
 initStorage();
 
+// Show the saved sound setting on the sound buttons.
+updateSoundButtons();
+
 // Get the board ready to listen for taps (practice mode shows a game on it).
 setupBoard(document.getElementById("board"));
 

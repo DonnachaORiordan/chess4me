@@ -6,6 +6,18 @@ const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 // Full piece names, used as the images' alt text (for screen readers).
 const PIECE_NAMES = { p: "pawn", n: "knight", b: "bishop", r: "rook", q: "queen", k: "king" };
 
+// How long a piece takes to slide from one square to another, in milliseconds.
+const SLIDE_TIME = 200;
+
+// Pictures drawn in code (SVG): a red circle with a white X, and a green circle with a white tick.
+const WRONG_ICON =
+  '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#d64545"/>' +
+  '<path d="M8 8 L16 16 M16 8 L8 16" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>';
+const TICK_ICON =
+  '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#3f9d4f"/>' +
+  '<path d="M6.5 12.5 L10.5 16.5 L17.5 8.5" stroke="white" stroke-width="3" fill="none" ' +
+  'stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
 // What the board currently knows about.
 const boardState = {
   element: null,       // the #board element on the page
@@ -89,19 +101,26 @@ function updateBoard() {
   squares.forEach(function (square) {
     const name = square.dataset.square;
 
-    // Remove the old piece image and markers.
-    square.innerHTML = "";
+    // Remove the old markers.
     square.classList.remove("selected", "move-target", "capture-target");
 
-    // Add the piece image, if there is a piece on this square.
+    // Update the piece image, but only if the piece on this square has changed.
+    // (Leaving unchanged pieces alone means a piece that is sliding keeps sliding.)
     const piece = game.get(name); // e.g. { type: "n", color: "w" } or null
-    if (piece) {
-      const img = document.createElement("img");
-      img.src = "assets/pieces/" + piece.color + piece.type.toUpperCase() + ".svg";
-      img.alt = (piece.color === "w" ? "white " : "black ") + PIECE_NAMES[piece.type];
-      img.className = "piece";
-      img.draggable = false;
-      square.appendChild(img);
+    const wanted = piece ? piece.color + piece.type.toUpperCase() : ""; // e.g. "wN"
+    const oldImg = square.querySelector(".piece");
+    const current = oldImg ? oldImg.dataset.piece : "";
+    if (wanted !== current) {
+      if (oldImg) oldImg.remove();
+      if (piece) {
+        const img = document.createElement("img");
+        img.src = "assets/pieces/" + wanted + ".svg";
+        img.alt = (piece.color === "w" ? "white " : "black ") + PIECE_NAMES[piece.type];
+        img.className = "piece";
+        img.dataset.piece = wanted;
+        img.draggable = false;
+        square.appendChild(img);
+      }
     }
 
     // Highlight the selected piece's square.
@@ -118,6 +137,82 @@ function updateBoard() {
     }
   });
 }
+
+// ===== Animations and pop-ups =====
+
+// Finds a square's element on the page by its name, e.g. "e4".
+function getSquareElement(name) {
+  return boardState.element.querySelector('[data-square="' + name + '"]');
+}
+
+// Shows a move that has just been made in the game, with the piece sliding into place.
+// If "backwards" is true, shows a move that has just been taken back (undone),
+// with the piece sliding back to where it came from.
+function showMove(move, backwards) {
+  updateBoard(); // first put every piece in its new place
+
+  // Then make the moved piece look as if it starts from its old square and slides over.
+  const start = backwards ? move.to : move.from;
+  const end = backwards ? move.from : move.to;
+  slidePiece(start, end);
+
+  // Castling also moves a rook. Flags: "k" = kingside castling, "q" = queenside castling.
+  const rank = (move.color === "w") ? "1" : "8";
+  if (move.flags.includes("k")) {
+    slidePiece(backwards ? "f" + rank : "h" + rank, backwards ? "h" + rank : "f" + rank);
+  } else if (move.flags.includes("q")) {
+    slidePiece(backwards ? "d" + rank : "a" + rank, backwards ? "a" + rank : "d" + rank);
+  }
+}
+
+// Slides the piece that is now on square "to", so it appears to travel from square "from".
+function slidePiece(from, to) {
+  const img = getSquareElement(to).querySelector(".piece");
+  if (!img) return;
+
+  // How far apart the two squares are on screen, in pixels.
+  const fromBox = getSquareElement(from).getBoundingClientRect();
+  const toBox = getSquareElement(to).getBoundingClientRect();
+  const dx = fromBox.left - toBox.left;
+  const dy = fromBox.top - toBox.top;
+
+  // Jump the piece (with no animation) back to the start square...
+  img.classList.add("sliding"); // keeps it above other pieces while it moves
+  img.style.transition = "none";
+  img.style.transform = "translate(" + dx + "px, " + dy + "px)";
+  img.getBoundingClientRect(); // makes the browser draw it there before continuing
+
+  // ...then let it slide smoothly to its real place.
+  img.style.transition = "transform " + SLIDE_TIME + "ms ease-out";
+  img.style.transform = "";
+  setTimeout(function () { img.classList.remove("sliding"); }, SLIDE_TIME);
+}
+
+// Pops up the red X on a square (for a wrong move).
+function showWrongMark(squareName) {
+  const mark = document.createElement("div");
+  mark.className = "wrong-mark";
+  mark.innerHTML = WRONG_ICON;
+  getSquareElement(squareName).appendChild(mark);
+}
+
+// Removes any red X from the board.
+function clearWrongMarks() {
+  boardState.element.querySelectorAll(".wrong-mark").forEach(function (mark) {
+    mark.remove();
+  });
+}
+
+// Pops up the green tick in the middle of the board (end of the line).
+// It disappears when the board is next drawn (e.g. on Restart).
+function showSuccessTick() {
+  const tick = document.createElement("div");
+  tick.className = "success-tick";
+  tick.innerHTML = TICK_ICON;
+  boardState.element.appendChild(tick);
+}
+
+// ===== Taps =====
 
 // Runs whenever the user taps (or clicks) anywhere on the board.
 function handleBoardTap(event) {

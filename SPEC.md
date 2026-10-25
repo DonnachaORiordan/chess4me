@@ -312,7 +312,7 @@ see working in the browser. The user commits after each step.
 - [x] 4. Main menu and course page, with switching between screens.
 - [x] 5. Practice mode: correct/wrong moves, the app's automatic replies,
          board flipping, end of line.
-- [ ] 6. Feedback: red X, green tick, slide animations, sounds, mute toggle.
+- [x] 6. Feedback: red X, green tick, slide animations, sounds, mute toggle.
 - [ ] 7. Hint and Show move buttons. Comments shown during practice.
 - [ ] 8. Put it online with GitHub Pages so it can be tested on the iPhone.
 - [ ] 9. Watch mode.

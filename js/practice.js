@@ -2,7 +2,7 @@
 // the prepared replies for the other colour.
 
 // How long a wrong move stays on the board before going back, in milliseconds.
-const WRONG_MOVE_SHOW_TIME = 800;
+const WRONG_MOVE_SHOW_TIME = 1000;
 
 // What practice mode currently knows about.
 const practiceState = {
@@ -102,12 +102,18 @@ function handlePracticeMove(move) {
     return;
   }
 
-  // Wrong move: show it briefly, then take it back so the user can try again.
+  // Wrong move: the piece slides there, the red X pops up and the "incorrect" sound plays.
+  // After a moment, the piece slides back so the user can try again.
+  showMove(move);
+  showWrongMark(move.to);
+  playIncorrectSound();
   setBoardLocked(true);
   setPracticeStatus("That's not the move in this course. Try again.");
   practiceState.timer = setTimeout(function () {
     practiceState.timer = null;
     game.undo();
+    clearWrongMarks();
+    showMove(move, true); // slide back
     setBoardLocked(false);
   }, WRONG_MOVE_SHOW_TIME);
 }
@@ -116,14 +122,16 @@ function handlePracticeMove(move) {
 function acceptMove(node, move) {
   practiceState.played.push(move.san);
   practiceState.nextMoves = node.children;
-  updateBoard();
+  showMove(move);
+  playMoveSound();
   renderMoveList();
   continuePractice();
 }
 
-// The end of the line has been reached.
+// The end of the line has been reached: the green tick pops up.
 function finishPractice() {
   setBoardLocked(true);
+  showSuccessTick();
   setPracticeStatus("End of the line. Well done!");
   document.getElementById("practice-end").hidden = false;
 }
