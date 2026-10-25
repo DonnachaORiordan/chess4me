@@ -4,6 +4,9 @@
 document.title = APP_NAME;
 document.getElementById("app-title").textContent = APP_NAME;
 
+// Prepare saved data (creates the example course on first launch).
+initStorage();
+
 // Start a new chess game (chess.js) in the starting position, and show it on the board.
 const game = new Chess();
 setupBoard(document.getElementById("board"), game);

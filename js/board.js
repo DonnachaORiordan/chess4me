@@ -22,8 +22,9 @@ function drawBoard(boardElement) {
     for (let fileIndex = 0; fileIndex < 8; fileIndex++) {
       const square = document.createElement("div");
 
-      // a1 is a dark square. A square is light when (column + row) is odd.
-      const isLight = (fileIndex + rank) % 2 === 1;
+      // a1 is a dark square. With columns counted from 0 (a = 0, b = 1 ...),
+      // a square is light when (column + row) is even. E.g. a1: 0 + 1 = 1, odd, so dark.
+      const isLight = (fileIndex + rank) % 2 === 0;
       square.className = isLight ? "square-light" : "square-dark";
 
       // Remember the square's name (e.g. "e4") so taps know which square they hit.
