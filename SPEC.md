@@ -308,7 +308,7 @@ see working in the browser. The user commits after each step.
          empty board drawn on screen in the right colours.
 - [x] 2. Add chess.js and piece images. Show the starting position.
          Tap-to-move with highlights and legal-move dots.
-- [ ] 3. storage.js, the course data format, and the example Italian Game course.
+- [x] 3. storage.js, the course data format, and the example Italian Game course.
 - [ ] 4. Main menu and course page, with switching between screens.
 - [ ] 5. Practice mode: correct/wrong moves, the app's automatic replies,
          board flipping, end of line.
