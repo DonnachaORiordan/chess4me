@@ -8,6 +8,9 @@
   --green-light: #3f7d53;   /* button hover */
   --square-light: #eeeed2;  /* light board squares (cream) */
   --square-dark: #769656;   /* dark board squares (green) */
+  --selected-light: #f5f682; /* selected piece's square, on a light square */
+  --selected-dark: #b9ca43;  /* selected piece's square, on a dark square */
+  --move-dot: rgba(0, 0, 0, 0.15); /* legal-move dots and capture rings */
 }
 
 /* ===== Page ===== */
@@ -37,6 +40,16 @@ h1 {
   border-radius: 4px;
   overflow: hidden; /* keeps the corner squares inside the rounded corners */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  touch-action: manipulation;          /* no double-tap zoom delay on phones */
+  -webkit-tap-highlight-color: transparent; /* no grey flash when tapping on iPhone */
+  user-select: none;                   /* taps don't select/highlight text */
+  -webkit-user-select: none;
+}
+
+/* Every square: "position: relative" lets the dots be placed inside it */
+.board [data-square] {
+  position: relative;
+  cursor: pointer;
 }
 
 .square-light {
@@ -45,4 +58,42 @@ h1 {
 
 .square-dark {
   background-color: var(--square-dark);
+}
+
+/* ===== Pieces ===== */
+.piece {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* taps go to the square underneath */
+}
+
+/* ===== Selected piece and legal moves ===== */
+.square-light.selected {
+  background-color: var(--selected-light);
+}
+
+.square-dark.selected {
+  background-color: var(--selected-dark);
+}
+
+/* A small dot in the middle of an empty square the piece can move to */
+.move-target::after {
+  content: "";
+  position: absolute;
+  top: 35%;
+  left: 35%;
+  width: 30%;
+  height: 30%;
+  border-radius: 50%;
+  background-color: var(--move-dot);
+}
+
+/* A ring around a piece that can be captured (a dot would be hidden by the piece) */
+.capture-target::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(transparent 68%, var(--move-dot) 69%);
 }
