@@ -24,9 +24,15 @@ body {
   font-family: Arial, sans-serif;
   background-color: var(--background);
   color: var(--text);
-  max-width: 600px;
+  max-width: 960px;   /* wide enough for the board and move list side by side */
   margin: 0 auto;
   padding: 16px;
+}
+
+/* Menu-style screens stay narrower, centred on the page */
+.screen-narrow {
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 h1 {
@@ -144,6 +150,52 @@ h2 {
   align-items: center;
   gap: 10px;
   margin: 0;
+}
+
+/* ===== Practice mode ===== */
+
+/* Phones (narrow): board on top, side panel below it */
+.practice-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Laptops and wide screens: board on the left, side panel on the right */
+@media (min-width: 800px) {
+  .practice-layout {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  .board-area {
+    flex: 0 1 600px; /* up to 600px wide, can shrink if needed */
+    min-width: 0;
+  }
+
+  .side-panel {
+    flex: 1 1 220px;
+  }
+}
+
+/* Short messages, e.g. "Your move." */
+.status {
+  min-height: 1.5em; /* keeps the space, so things don't jump when it's empty */
+  margin: 0 0 12px;
+  font-weight: bold;
+}
+
+/* The move list: three columns (number, White's move, Black's move) */
+.move-list {
+  display: grid;
+  grid-template-columns: 2.5em 1fr 1fr;
+  gap: 4px 8px;
+  font-size: 16px;
+}
+
+.move-number {
+  color: #888888;
 }
 
 /* ===== Board =====

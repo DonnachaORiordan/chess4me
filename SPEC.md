@@ -310,7 +310,7 @@ see working in the browser. The user commits after each step.
          Tap-to-move with highlights and legal-move dots.
 - [x] 3. storage.js, the course data format, and the example Italian Game course.
 - [x] 4. Main menu and course page, with switching between screens.
-- [ ] 5. Practice mode: correct/wrong moves, the app's automatic replies,
+- [x] 5. Practice mode: correct/wrong moves, the app's automatic replies,
          board flipping, end of line.
 - [ ] 6. Feedback: red X, green tick, slide animations, sounds, mute toggle.
 - [ ] 7. Hint and Show move buttons. Comments shown during practice.

@@ -13,7 +13,7 @@
        between them by adding/removing the "hidden" attribute). -->
 
   <!-- ===== Main menu ===== -->
-  <section id="menu-screen" class="screen">
+  <section id="menu-screen" class="screen screen-narrow">
     <!-- App name heading (text filled in by app.js) -->
     <h1 id="app-title"></h1>
 
@@ -30,36 +30,59 @@
   </section>
 
   <!-- ===== Course page ===== -->
-  <section id="course-screen" class="screen" hidden>
+  <section id="course-screen" class="screen screen-narrow" hidden>
     <button id="course-back" class="back-button">&larr; Back</button>
 
     <!-- Course name and colour (filled in by app.js) -->
     <h2 id="course-name"></h2>
     <p id="course-colour" class="course-colour"></p>
 
-    <!-- Greyed out ("disabled") until the steps that make them work -->
+    <!-- Watch, Edit and Delete are greyed out ("disabled") until the steps that make them work -->
     <div class="button-row">
-      <button id="course-practice" class="button" disabled>Practice</button>
+      <button id="course-practice" class="button">Practice</button>
       <button id="course-watch" class="button" disabled>Watch</button>
       <button id="course-edit" class="button" disabled>Edit</button>
       <button id="course-delete" class="button" disabled>Delete</button>
     </div>
   </section>
 
-  <!-- ===== Board screen =====
-       Not reachable yet: practice mode (step 5) will use it. -->
-  <section id="board-screen" class="screen" hidden>
-    <!-- The chessboard: board.js fills this with 64 squares -->
-    <div id="board" class="board"></div>
+  <!-- ===== Practice mode ===== -->
+  <section id="practice-screen" class="screen" hidden>
+    <button id="practice-back" class="back-button">&larr; Back</button>
+    <h2 id="practice-title"></h2>
+
+    <!-- Board on the left and the side panel on the right on wide screens;
+         the side panel goes below the board on narrow screens (phones). -->
+    <div class="practice-layout">
+      <div class="board-area">
+        <!-- The chessboard: board.js fills this with 64 squares -->
+        <div id="board" class="board"></div>
+      </div>
+
+      <div class="side-panel">
+        <!-- Short messages, e.g. "Your move." (filled in by practice.js) -->
+        <p id="practice-status" class="status"></p>
+
+        <!-- The moves played so far (filled in by practice.js) -->
+        <div id="move-list" class="move-list"></div>
+
+        <!-- Shown at the end of the line -->
+        <div id="practice-end" class="button-row" hidden>
+          <button id="practice-restart" class="button">Restart</button>
+          <button id="practice-menu" class="button">Main menu</button>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- Classic script tags (not modules) so the page works by double-clicking index.html.
-       Order matters: the chess.js library, config and storage first, then the board code,
-       then the app that uses them. -->
+       Order matters: the chess.js library, config and storage first, then the board
+       and practice code, then the app that uses them. -->
   <script src="lib/chess.js"></script>
   <script src="js/config.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/board.js"></script>
+  <script src="js/practice.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

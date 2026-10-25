@@ -69,6 +69,9 @@ function makeCourseCard(course) {
 
 // ===== Course page =====
 
+// The id of the course whose page is open.
+let currentCourseId = null;
+
 // Shows the page for one course.
 function showCoursePage(courseId) {
   const course = getCourse(courseId);
@@ -76,6 +79,7 @@ function showCoursePage(courseId) {
     showMainMenu(); // the course no longer exists
     return;
   }
+  currentCourseId = courseId;
 
   document.getElementById("course-name").textContent = course.name;
 
@@ -90,6 +94,11 @@ function showCoursePage(courseId) {
 
 document.getElementById("course-back").addEventListener("click", showMainMenu);
 
+// "Practice": start practising this course (see practice.js).
+document.getElementById("course-practice").addEventListener("click", function () {
+  startPractice(currentCourseId);
+});
+
 // ===== Start the app =====
 
 // Show the app name (from config.js) in the browser tab and the heading.
@@ -99,9 +108,8 @@ document.getElementById("app-title").textContent = APP_NAME;
 // Prepare saved data (creates the example course on first launch).
 initStorage();
 
-// Set up the board (on its own screen, not shown yet: practice mode will use it).
-const game = new Chess();
-setupBoard(document.getElementById("board"), game);
+// Get the board ready to listen for taps (practice mode shows a game on it).
+setupBoard(document.getElementById("board"));
 
 // Open on the main menu.
 showMainMenu();
