@@ -162,6 +162,19 @@ h2 {
   transform: scale(0.98);
 }
 
+/* Course name with the stats summary underneath */
+.course-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* The stats summary: small and subtle */
+.course-card-stats {
+  color: #888888;
+  font-size: 13px;
+}
+
 /* The square showing which colour the user plays */
 .colour-box {
   display: inline-block;

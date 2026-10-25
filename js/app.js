@@ -129,23 +129,47 @@ function renderCourseList() {
   });
 }
 
-// Makes one course card: colour box on the left, then the course name.
-// Tapping the card opens the course page.
+// Makes one course card: colour box on the left, then the course name
+// with a short stats summary below it. Tapping the card opens the course page.
 function makeCourseCard(course) {
   const card = document.createElement("button");
   card.className = "course-card";
 
   card.appendChild(makeColourBox(course.colour));
 
+  const text = document.createElement("span");
+  text.className = "course-card-text";
+
   const name = document.createElement("span");
   name.className = "course-card-name";
   name.textContent = course.name;
-  card.appendChild(name);
+  text.appendChild(name);
+
+  const summary = document.createElement("span");
+  summary.className = "course-card-stats";
+  summary.textContent = statsSummary(course.stats);
+  text.appendChild(summary);
+
+  card.appendChild(text);
 
   card.addEventListener("click", function () {
     showCoursePage(course.id);
   });
   return card;
+}
+
+// A short stats summary for a course card, e.g. "Accuracy 86% · Practised 12 times".
+function statsSummary(stats) {
+  if (!stats || !stats.timesPractised) return "Not practised yet";
+
+  const parts = [];
+  // Accuracy = moves right on the first try ÷ all the user's moves, as a %.
+  if (stats.userMoves > 0) {
+    parts.push("Accuracy " + Math.round(100 * stats.correctFirstTry / stats.userMoves) + "%");
+  }
+  const times = stats.timesPractised;
+  parts.push("Practised " + times + (times === 1 ? " time" : " times"));
+  return parts.join(" · ");
 }
 
 // ===== Course page =====

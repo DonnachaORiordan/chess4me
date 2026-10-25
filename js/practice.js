@@ -11,7 +11,10 @@ const practiceState = {
   userColour: "w",  // "w" or "b": the colour the user plays
   nextMoves: [],    // the possible next moves in the course's move tree
   played: [],       // the moves played so far (e.g. ["e4", "e5"]), for the move list
-  timer: null       // the waiting timer (app's move, or wrong move going back), if any
+  path: [],         // the same moves, written as in the course (used to name moves in the stats)
+  timer: null,      // the waiting timer (app's move, or wrong move going back), if any
+  helpedThisMove: false, // true once the user has made a mistake or had help on the current move
+  hintThisMove: false    // true once a hint has been counted for the current move
 };
 
 // Starts practising a course from the beginning.
@@ -28,6 +31,13 @@ function startPractice(courseId) {
   practiceState.userColour = (course.colour === "white") ? "w" : "b";
   practiceState.nextMoves = course.moves;
   practiceState.played = [];
+  practiceState.path = [];
+
+  // Count this as one more practice. (Filling in any missing stats with zeros first.)
+  course.stats = Object.assign(makeEmptyStats(), course.stats);
+  course.stats.timesPractised++;
+  course.stats.lastPractised = new Date().toISOString();
+  savePracticeStats();
 
   document.getElementById("practice-title").textContent = course.name;
   document.getElementById("practice-end").hidden = true;
@@ -64,6 +74,9 @@ function continuePractice() {
 
   const game = practiceState.game;
   if (game.turn() === practiceState.userColour) {
+    // A new move for the user: no mistakes or help on it yet.
+    practiceState.helpedThisMove = false;
+    practiceState.hintThisMove = false;
     setBoardLocked(false);
     setHelpButtonsEnabled(true);
     setPracticeStatus("Your move.");
@@ -102,10 +115,22 @@ function handlePracticeMove(move) {
   // Either way, the piece first goes to the square it was sent to.
   game.move({ from: move.from, to: move.to, promotion: move.promotion });
 
+  const stats = practiceState.course.stats;
   if (node) {
+    // Correct. It only counts towards accuracy if there was no mistake or help on this move.
+    stats.userMoves++;
+    if (!practiceState.helpedThisMove) stats.correctFirstTry++;
+    savePracticeStats();
     acceptMove(node, move);
     return;
   }
+
+  // Wrong: count the mistake, overall and for this particular move.
+  const key = currentMoveKey();
+  stats.mistakes++;
+  stats.moveMistakes[key] = (stats.moveMistakes[key] || 0) + 1;
+  practiceState.helpedThisMove = true;
+  savePracticeStats();
 
   // Wrong move: the piece slides there, the red X pops up and the "incorrect" sound plays.
   // After a moment, the piece slides back so the user can try again.
@@ -128,6 +153,7 @@ function handlePracticeMove(move) {
 // Keeps a correct move (the user's or the app's) and moves on through the course.
 function acceptMove(node, move) {
   practiceState.played.push(move.san);
+  practiceState.path.push(node.move);
   practiceState.nextMoves = node.children;
   clearHint();
   showMove(move);
@@ -139,6 +165,8 @@ function acceptMove(node, move) {
 
 // The end of the line has been reached: the green tick pops up.
 function finishPractice() {
+  practiceState.course.stats.timesCompleted++;
+  savePracticeStats();
   setBoardLocked(true);
   showSuccessTick();
   setPracticeStatus("End of the line. Well done!");
@@ -159,12 +187,22 @@ function getExpectedMove() {
 }
 
 // "Hint": highlights the piece the user should move.
+// Counts as one hint used per move, however many times it's pressed.
 function giveHint() {
   const move = getExpectedMove();
-  if (move) showHint(move.from);
+  if (!move) return;
+  showHint(move.from);
+
+  if (!practiceState.hintThisMove) {
+    practiceState.hintThisMove = true;
+    practiceState.helpedThisMove = true;
+    practiceState.course.stats.hintsUsed++;
+    savePracticeStats();
+  }
 }
 
 // "Show move": plays the correct move for the user.
+// Counts as a move shown, and as one of the user's moves (but not a correct one).
 function showCorrectMove() {
   const node = practiceState.nextMoves[0];
   if (!node) return;
@@ -174,7 +212,26 @@ function showCorrectMove() {
     setPracticeStatus("This course has a move that isn't legal here: " + node.move);
     return;
   }
+
+  const stats = practiceState.course.stats;
+  stats.movesShown++;
+  stats.userMoves++;
+  savePracticeStats();
   acceptMove(node, move);
+}
+
+// ===== Stats =====
+
+// Saves the course's stats (see storage.js).
+function savePracticeStats() {
+  saveCourseStats(practiceState.course.id, practiceState.course.stats);
+}
+
+// Names the move the user is on, by the course moves leading up to and including it,
+// e.g. "e4 e5 Nf3". Used to count mistakes per move.
+function currentMoveKey() {
+  // Version 1 has only one prepared move at each point, so take the first.
+  return practiceState.path.concat(practiceState.nextMoves[0].move).join(" ");
 }
 
 // Makes the Hint and Show move buttons usable (true) or greyed out (false).

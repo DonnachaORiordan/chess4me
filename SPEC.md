@@ -317,7 +317,7 @@ see working in the browser. The user commits after each step.
 - [x] 8. Put it online with GitHub Pages so it can be tested on the iPhone.
 - [x] 9. Watch mode.
 - [x] 10. Course editor: new course, edit, delete, comments, promotion.
-- [ ] 11. Performance stats and the summary on menu cards.
+- [x] 11. Performance stats and the summary on menu cards.
 - [ ] 12. Export and import.
 - [ ] 13. App icon, manifest and iPhone home-screen tags.
 - [ ] 14. Offline support (service worker).

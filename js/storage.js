@@ -183,6 +183,16 @@ function saveCourse(course) {
   return writeData(data);
 }
 
+// Saves just a course's performance stats (without changing its "updated" date,
+// which is for changes to the course itself).
+function saveCourseStats(courseId, stats) {
+  const data = getData();
+  const course = data.courses.find(function (c) { return c.id === courseId; });
+  if (!course) return false;
+  course.stats = stats;
+  return writeData(data);
+}
+
 // Deletes a course by its id.
 function deleteCourse(id) {
   const data = getData();
