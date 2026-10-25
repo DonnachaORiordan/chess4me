@@ -12,6 +12,7 @@
   --selected-dark: #b9ca43;  /* selected piece's square, on a dark square */
   --move-dot: rgba(0, 0, 0, 0.15); /* legal-move dots and capture rings */
   --card: #ffffff;          /* course card background */
+  --hint: #f0a830;          /* orange ring around the piece to move (Hint button) */
 }
 
 /* Anything with the "hidden" attribute (e.g. screens not being shown) stays hidden */
@@ -75,6 +76,11 @@ h2 {
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 20px;
+}
+
+/* A button row with less space around it (e.g. Hint / Show move) */
+.button-row-tight {
+  margin: 0 0 16px;
 }
 
 /* The plain "← Back" link-style button at the top of a screen */
@@ -152,6 +158,16 @@ h2 {
   margin: 0;
 }
 
+/* ===== Hint: a gently pulsing orange ring around the piece to move ===== */
+.hint {
+  animation: hint-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes hint-pulse {
+  0%, 100% { box-shadow: inset 0 0 0 4px var(--hint); }
+  50%      { box-shadow: inset 0 0 0 4px transparent; }
+}
+
 /* ===== Red X and green tick ===== */
 
 /* Red X: in the top-right corner of the square the wrong move went to */
@@ -225,6 +241,18 @@ h2 {
   .side-panel {
     flex: 1 1 220px;
   }
+}
+
+/* The comment box below the board */
+.comment-box {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-left: 4px solid var(--green);
+  border-radius: 8px;
+  background-color: var(--card);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  font-size: 16px;
+  line-height: 1.4;
 }
 
 /* Short messages, e.g. "Your move." */

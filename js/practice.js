@@ -31,6 +31,8 @@ function startPractice(courseId) {
 
   document.getElementById("practice-title").textContent = course.name;
   document.getElementById("practice-end").hidden = true;
+  document.getElementById("practice-controls").hidden = false;
+  showPracticeComment("");
   renderMoveList();
 
   // Show the board with the user's colour at the bottom.
@@ -62,9 +64,11 @@ function continuePractice() {
   const game = practiceState.game;
   if (game.turn() === practiceState.userColour) {
     setBoardLocked(false);
+    setHelpButtonsEnabled(true);
     setPracticeStatus("Your move.");
   } else {
     setBoardLocked(true);
+    setHelpButtonsEnabled(false);
     const appColour = (game.turn() === "w") ? "White" : "Black";
     setPracticeStatus("Waiting for " + appColour + "'s move…");
     practiceState.timer = setTimeout(playAppMove, MOVE_DELAY);
@@ -108,6 +112,7 @@ function handlePracticeMove(move) {
   showWrongMark(move.to);
   playIncorrectSound();
   setBoardLocked(true);
+  setHelpButtonsEnabled(false);
   setPracticeStatus("That's not the move in this course. Try again.");
   practiceState.timer = setTimeout(function () {
     practiceState.timer = null;
@@ -115,6 +120,7 @@ function handlePracticeMove(move) {
     clearWrongMarks();
     showMove(move, true); // slide back
     setBoardLocked(false);
+    setHelpButtonsEnabled(true);
   }, WRONG_MOVE_SHOW_TIME);
 }
 
@@ -122,8 +128,10 @@ function handlePracticeMove(move) {
 function acceptMove(node, move) {
   practiceState.played.push(move.san);
   practiceState.nextMoves = node.children;
+  clearHint();
   showMove(move);
   playMoveSound();
+  showPracticeComment(node.comment); // shows the move's comment, or hides the box if it has none
   renderMoveList();
   continuePractice();
 }
@@ -133,7 +141,52 @@ function finishPractice() {
   setBoardLocked(true);
   showSuccessTick();
   setPracticeStatus("End of the line. Well done!");
+  document.getElementById("practice-controls").hidden = true;
   document.getElementById("practice-end").hidden = false;
+}
+
+// ===== Hint and Show move =====
+
+// Finds the move the user should play next, as a chess.js move (with "from" and "to" squares).
+// Returns null if there's no such move.
+function getExpectedMove() {
+  // Version 1 has only one prepared move at each point, so take the first.
+  const node = practiceState.nextMoves[0];
+  if (!node) return null;
+  const legalMoves = practiceState.game.moves({ verbose: true });
+  return legalMoves.find(function (m) { return sameMove(node.move, m.san); }) || null;
+}
+
+// "Hint": highlights the piece the user should move.
+function giveHint() {
+  const move = getExpectedMove();
+  if (move) showHint(move.from);
+}
+
+// "Show move": plays the correct move for the user.
+function showCorrectMove() {
+  const node = practiceState.nextMoves[0];
+  if (!node) return;
+  setBoardLocked(true); // drops any piece the user had selected
+  const move = practiceState.game.move(node.move);
+  if (!move) {
+    setPracticeStatus("This course has a move that isn't legal here: " + node.move);
+    return;
+  }
+  acceptMove(node, move);
+}
+
+// Makes the Hint and Show move buttons usable (true) or greyed out (false).
+function setHelpButtonsEnabled(enabled) {
+  document.getElementById("practice-hint").disabled = !enabled;
+  document.getElementById("practice-show").disabled = !enabled;
+}
+
+// Shows a move's comment in the box below the board, or hides the box if there's no comment.
+function showPracticeComment(text) {
+  const box = document.getElementById("practice-comment");
+  box.textContent = text || "";
+  box.hidden = !text;
 }
 
 // True if two moves are the same, ignoring check (+) and mate (#) signs.
@@ -175,6 +228,10 @@ document.getElementById("practice-back").addEventListener("click", function () {
   stopPractice();
   showCoursePage(practiceState.course.id);
 });
+
+// "Hint" and "Show move"
+document.getElementById("practice-hint").addEventListener("click", giveHint);
+document.getElementById("practice-show").addEventListener("click", showCorrectMove);
 
 // "Restart": practise the same course again from the beginning.
 document.getElementById("practice-restart").addEventListener("click", function () {

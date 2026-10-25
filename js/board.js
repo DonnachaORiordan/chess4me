@@ -203,6 +203,20 @@ function clearWrongMarks() {
   });
 }
 
+// Highlights the square of the piece the user should move (the Hint button).
+// The highlight stays until clearHint() is called (or the board is next drawn).
+function showHint(squareName) {
+  clearHint();
+  getSquareElement(squareName).classList.add("hint");
+}
+
+// Removes the hint highlight.
+function clearHint() {
+  boardState.element.querySelectorAll(".hint").forEach(function (square) {
+    square.classList.remove("hint");
+  });
+}
+
 // Pops up the green tick in the middle of the board (end of the line).
 // It disappears when the board is next drawn (e.g. on Restart).
 function showSuccessTick() {

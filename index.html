@@ -62,11 +62,20 @@
       <div class="board-area">
         <!-- The chessboard: board.js fills this with 64 squares -->
         <div id="board" class="board"></div>
+
+        <!-- The comment for the last move, if it has one (filled in by practice.js) -->
+        <div id="practice-comment" class="comment-box" hidden></div>
       </div>
 
       <div class="side-panel">
         <!-- Short messages, e.g. "Your move." (filled in by practice.js) -->
         <p id="practice-status" class="status"></p>
+
+        <!-- Help buttons: only usable on the user's turn; hidden at the end of the line -->
+        <div id="practice-controls" class="button-row button-row-tight">
+          <button id="practice-hint" class="button">Hint</button>
+          <button id="practice-show" class="button">Show move</button>
+        </div>
 
         <!-- The moves played so far (filled in by practice.js) -->
         <div id="move-list" class="move-list"></div>
