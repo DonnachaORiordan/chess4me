@@ -1,0 +1,48 @@
+/* ===== Colours =====
+   Kept in one place so they're easy to change.
+   Page colours match the earlier practice page (web-basics/style.css). */
+:root {
+  --background: #f4f1ea;    /* cream page background */
+  --text: #333333;          /* dark grey text */
+  --green: #2e5e3e;         /* headings and buttons */
+  --green-light: #3f7d53;   /* button hover */
+  --square-light: #eeeed2;  /* light board squares (cream) */
+  --square-dark: #769656;   /* dark board squares (green) */
+}
+
+/* ===== Page ===== */
+body {
+  font-family: Arial, sans-serif;
+  background-color: var(--background);
+  color: var(--text);
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+h1 {
+  color: var(--green);
+  text-align: center;
+}
+
+/* ===== Board =====
+   A grid of 8 columns x 8 rows. It fills the available width
+   (the full screen width on a phone) and always stays square. */
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 4px;
+  overflow: hidden; /* keeps the corner squares inside the rounded corners */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.square-light {
+  background-color: var(--square-light);
+}
+
+.square-dark {
+  background-color: var(--square-dark);
+}

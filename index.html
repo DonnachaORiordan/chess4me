@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- Makes the page fit phone screens properly -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The title is filled in by app.js from config.js, so the name lives in one place -->
+  <title></title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- App name heading (text filled in by app.js) -->
+  <h1 id="app-title"></h1>
+
+  <!-- The chessboard: board.js fills this with 64 squares -->
+  <div id="board" class="board"></div>
+
+  <!-- Classic script tags (not modules) so the page works by double-clicking index.html.
+       Order matters: config first, then the board code, then the app that uses them. -->
+  <script src="js/config.js"></script>
+  <script src="js/board.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
