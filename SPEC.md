@@ -4,6 +4,12 @@ This file describes exactly what Chess4Me should do and look like.
 Claude Code: read this whole file before starting any work.
 If something here is unclear or seems wrong, ASK the user before guessing.
 
+NOTE: Version 1 is complete (sections 1–14). Version 2 is described in
+sections 15–23. Where a version 2 section differs from an earlier section,
+the version 2 section wins. When a version 2 build step changes behaviour
+described in an earlier section, update that earlier section too, so this
+file always describes the app as it really is.
+
 ---
 
 ## 1. What the app is
@@ -124,7 +130,7 @@ Files can be split differently if there's a good reason, but explain why first.
 - Buttons: "Practice", "Watch", "Edit", "Delete".
 - Delete asks for confirmation first ("Delete Italian Game? This can't be
   undone.").
-- (Version 2: this becomes the course explorer, see section 12.)
+- (Version 2: this becomes the course explorer, see section 19.)
 
 ### 6.3 Course editor (creating or editing a course)
 - Fields: course name, and which colour the user plays (White/Black).
@@ -282,7 +288,7 @@ times". Keep it subtle.
 
 ## 12. Not in version 1 (planned for later)
 
-Version 2:
+Version 2 (now fully planned in sections 15–23):
 - Branches: more than one prepared reply at a position.
 - Course explorer: walk through a course's moves, choose a branch at each
   split, then "Practice from here" (random branches after this point) or
@@ -295,9 +301,13 @@ Later:
 - PGN import/export.
 - Chess engine / evaluation bar (Stockfish). Note: Stockfish's GPL licence
   matters if the app is ever distributed.
-- Spaced repetition.
+- Spaced repetition (including "smart" random choice that favours lines
+  practiced least or with the most mistakes).
+- Transpositions (different move orders reaching the same position treated
+  as one position). For now they are just separate branches.
 - User accounts and syncing between devices.
 - Course descriptions on cards and a redesigned main menu.
+- Duplicating courses, sorting/searching courses.
 
 ---
 
@@ -344,3 +354,325 @@ Tick a step ONLY after the user confirms it works.
 - [x] Move and incorrect sounds work and can be muted.
 - [x] Stats update after practising.
 - [x] I can export a backup and import it again.
+
+---
+---
+
+# VERSION 2
+
+## 15. Version 2 overview
+
+Version 2 adds to the SAME app (same repo, same address, same home-screen
+icon). It is not a separate app. It adds:
+
+1. A set of small improvements to version 1 (section 16).
+2. Branches: a course can have more than one prepared reply for the
+   opponent at a position (section 17).
+3. Practice with random branch choice (section 18).
+4. The course explorer, which replaces the course page (section 19).
+5. Stats for every position in the tree, with colour-coded moves (section 20).
+6. "Cover every line" and "Practice weak spots" modes (sections 18.4, 18.5).
+
+All the rules from sections 1–11 still apply (plain HTML/CSS/JS, no modules,
+licences checked and approved before downloading anything, CREDITS.md, all
+saving in storage.js, app name only in config.js and manifest.json).
+
+Whenever app files change and are pushed, bump the service worker's cache
+version so the iPhone picks up the update.
+
+---
+
+## 16. Small improvements to version 1
+
+### 16.1 Sounds
+- New "move" sound: the current one doesn't sound like wood. Find 2 or 3
+  free, permissively licensed options that sound like a wooden piece put down
+  on a real board, and let the user listen and choose.
+- New "capture" sound, played instead of the move sound when a piece is
+  captured. Castling uses the normal move sound.
+- New "check" sound, played instead of the move sound when a move gives
+  check. Applies to both colours' moves, in every mode (practice, watch,
+  editor, explorer).
+- New "checkmate" sound: like a piece (the king) falling over on a wooden
+  board. Played after the mating move.
+- All new sounds follow section 7's rules (free, licence checked, user
+  approves, added to CREDITS.md, respects the mute setting).
+
+### 16.2 Checkmate
+- When a move gives checkmate, a small black circle with a white skull icon
+  pops up beside the checkmated king: exactly the same size and positioning
+  as the red X icon for a wrong move. The checkmate sound plays.
+- The skull icon is drawn by Claude Code as an original SVG (no licence
+  issues), in the same style as the red X and green tick.
+- Shown in practice, watch, the editor and the explorer.
+- In practice, if the line ends in checkmate, the skull replaces the green
+  tick, then the usual "Restart" and "Main menu" buttons appear. The game is
+  over: no more moves can be made.
+
+### 16.3 Board coordinates
+- Small, subtle labels on the board edges: letters (a–h) along the bottom
+  row and numbers (1–8) up the left column, drawn INSIDE the edge squares
+  (chess.com style).
+- Label colour contrasts subtly with its square (cream text on green squares,
+  green text on cream squares).
+- They flip with the board: when the user plays Black, "h" is on the left
+  and "8" is at the bottom.
+- Shown on every board (practice, watch, editor, explorer).
+
+### 16.4 Sound icon
+- Replace the sound on/off text button with an icon: a speaker icon when
+  sound is on, a speaker with a cross (muted) icon when sound is off.
+- Use the icon everywhere the toggle appears (main menu and beside the board).
+- Icons drawn by Claude Code as original SVGs.
+- At least 44px tap area.
+
+### 16.5 Timing
+- The app's reply delay in practice changes from 3 seconds to 1.5 seconds,
+  including when the app plays first.
+- Watch mode waits 1.5 seconds before playing the first move (instead of
+  playing it instantly), and 1.5 seconds between moves.
+- Both values are settings in `config.js`.
+
+### 16.6 Spelling
+- Everywhere the user can see text, use "practice", "practiced" and
+  "practicing" (never "practise" or "practised"). This includes buttons,
+  stats text and messages.
+
+### 16.7 Board shadow
+- Keep the board's current shadow as it is. No change.
+
+---
+
+## 17. Branches
+
+### 17.1 How branches work
+- A course is a tree of moves. A "branch" (or "side line") is where the
+  OPPONENT has more than one prepared reply at a position.
+- The user's own moves never branch: for each position, the user has exactly
+  ONE planned move.
+- Branches can happen at any depth, including the very first move (e.g. a
+  Black course with prepared answers to both 1.e4 and 1.d4).
+- Each position with several opponent replies has one "main line" reply
+  (the first one added) and one or more side lines.
+
+### 17.2 Adding branches in the editor
+- The user can tap ANY move in the move list to jump to the position after
+  that move. The board shows that position and the move is highlighted.
+- Playing a move from that position:
+  - If that move already exists there, the editor simply follows it.
+  - If it is an OPPONENT move that doesn't exist yet, it is added as a new
+    side line.
+  - If it is a USER move and a different user move already exists there, ask:
+    "Replace 4.c3 with 4.d3? This deletes the 5 moves after it." Only replace
+    if the user confirms.
+- The forward/back arrows in the editor follow the main line at splits.
+
+### 17.3 Managing branches in the editor
+- "Make main line": promotes a side line to be the main line at its split.
+- "Delete from here": deletes the selected move and everything after it,
+  with a confirmation that says how many moves will be deleted
+  (e.g. "Delete 3...Nf6 and the 6 moves after it?"). Deleting the very first
+  move of the course is not allowed this way (use Delete course instead).
+- "Undo last move" removes the selected move only if it is the end of a line;
+  otherwise it is disabled or hidden (use "Delete from here").
+- Optional line names: the user can give a name to the first move of a side
+  line (e.g. "Two Knights Defence"). The name is shown next to that move in
+  the move list and the explorer.
+- Comments work as before, on any move.
+
+### 17.4 Move list display (all screens)
+- Show the whole tree, chess.com style:
+  - The main line is written normally.
+  - Side lines appear in brackets, indented, directly under the move where
+    they split, in a slightly muted colour. E.g.:
+    ```
+    1. e4 e5
+    2. Nf3 Nc6
+    3. Bc4 Bc5
+       (3... Nf6 4. Ng5)
+    4. c3 Nf6
+    5. d4 exd4
+    ```
+  - Side lines inside side lines are indented further.
+- Tapping any move jumps to it. The current move is highlighted.
+- On the iPhone, the list scrolls below the board if it gets long.
+- The user may want to try a simpler "current line only" view later; keep the
+  move list code in one place so it's easy to change.
+
+---
+
+## 18. Practice with branches
+
+### 18.1 Random branch choice
+- When the app reaches a split, it chooses which opponent reply to play at
+  random.
+- Each complete line in the course has an EQUAL chance of being chosen
+  (not 50/50 at each split, which would favour short side lines). Work out
+  the line before or during play so this holds.
+- Avoid playing exactly the same complete line twice in a row (when the
+  course has more than one line).
+
+### 18.2 Practice all
+- Starts from the beginning of the course, with random branches all the way.
+
+### 18.3 Practice from here / Practice this line only (from the explorer)
+- The user first picks a position in the explorer by tapping a move (section
+  19). The route from the start to that move is the "chosen route".
+- In BOTH modes, practice starts from move 1. The user plays their own moves
+  all the way, and the app plays the opponent moves along the chosen route
+  (not random). These moves count towards the stats like any other.
+- "Practice from here": after the chosen position, any further splits are
+  random (section 18.1).
+- "Practice this line only": after the chosen position, follow the main line
+  at every split to the end.
+
+### 18.4 Cover every line
+- Goes through every complete line in the course once, in random order.
+- Shows progress, e.g. "Line 3 of 7".
+- After each line ends (green tick or skull), a "Next line" button continues.
+- At the end, shows a short summary: lines done, accuracy, mistakes.
+- Can be stopped at any time with the back button.
+
+### 18.5 Practice weak spots
+- Practices only the lines that contain the user's weakest moves: user moves
+  with a first-try accuracy below a threshold (setting in config.js, default
+  80%), and that have been practiced at least once.
+- Lines with weaker moves are more likely to be chosen.
+- If there are no weak spots, show a friendly message (e.g. "No weak spots
+  right now. Nice work.").
+
+### 18.6 Everything else stays the same
+- Red X for wrong moves, hints, show move, comments, end of line, sounds,
+  user's colour at the bottom, all as in section 6.4 (with the 1.5 second
+  delay from 16.5).
+
+---
+
+## 19. Course explorer (replaces the course page)
+
+Tapping a course card on the main menu opens the explorer. It's for browsing
+the course, not being tested.
+
+- Top bar: back arrow (to main menu), course name, colour box, sound icon.
+- The board, with the user's colour at the bottom.
+- Arrows under the board: Start, Back one move, Forward one move. At a split,
+  Forward follows the main line.
+- The move list (section 17.4). Tapping any move jumps the board there; this
+  is how the user picks a branch. When the explorer opens, it starts at the
+  beginning (no moves played).
+- Comments for the current move are shown.
+- A small stats box for the current position (section 20.2).
+- Buttons:
+  - "Practice from here" (section 18.3)
+  - "Practice this line only" (section 18.3)
+  - "Watch this line": watch mode (section 6.5) along the chosen route, then
+    the main line to the end.
+  - "Practice all" (section 18.2)
+  - "Cover every line" (section 18.4)
+  - "Practice weak spots" (section 18.5)
+  - "Edit" and "Delete" (Delete keeps its confirmation).
+- Main actions are big, easy-to-tap buttons. Less-used ones (Edit, Delete)
+  are smaller.
+- The user will try this layout and probably adjust it.
+
+---
+
+## 20. Stats (version 2)
+
+### 20.1 What is tracked
+- Everything from section 9, per course.
+- Per move node (every position in the tree):
+  - times reached in practice
+  - for the user's moves: times answered correctly on the first try,
+    mistakes, hints used, moves shown
+- Course card summary on the main menu: "Accuracy 86% · Practiced 12 times
+  · 5 lines".
+
+### 20.2 Stats while browsing the explorer
+As the user moves through the tree, the stats box updates to show, for the
+current position:
+- times this position was reached
+- accuracy from here onwards (all the user's moves after this point)
+- mistakes on this move
+- hints and moves shown on this move
+Keep it small and subtle.
+
+### 20.3 Colour-coded moves
+- In the move list (explorer and practice), the user's moves are tinted
+  subtly by first-try accuracy: red (poorly known), through orange/yellow,
+  to green (well known).
+- Moves never practiced have no tint. Opponent moves have no tint.
+- The thresholds are settings in config.js.
+
+---
+
+## 21. Data upgrade
+
+- The saved data format becomes `dataVersion: 2`.
+- On first launch of version 2, storage.js upgrades existing version 1 data
+  automatically:
+  - Keep every course, its name, colour, moves and comments exactly.
+  - RESET all stats to zero (the user has chosen this) and set up the new
+    per-node stats.
+- Importing a version 1 backup file upgrades it the same way.
+- Export saves in the version 2 format.
+- Never lose courses or moves during the upgrade.
+- Before the first version 2 push, the user will export a backup from the
+  home-screen app.
+
+---
+
+## 22. Build plan (version 2)
+
+Build ONE step at a time, as with version 1. Each step ends with something
+the user can see working. The user commits after each step (and after each
+part of step 1).
+
+- [ ] 1. Version 1 improvements (section 16). Do them in this order, one
+         part at a time, waiting for the user to try and commit each part:
+         a) Sounds: new move sound (offer 2–3 options), capture, check,
+            checkmate sounds.
+         b) Checkmate skull icon and end of game.
+         c) Board coordinates, sound/mute icons, 1.5 second timings,
+            spelling changes.
+- [ ] 2. Data upgrade to dataVersion 2 (section 21), with per-node stats.
+         Existing courses still load and practice as before; stats reset.
+- [ ] 3. Editor: jump to any move, add side lines, own-move replace
+         confirmation, and the branched move list display (17.2, 17.4).
+- [ ] 4. Editor: make main line, delete from here, undo rules, line names
+         (17.3).
+- [ ] 5. Practice all with random branch choice, equal chance per line, no
+         repeat (18.1, 18.2), recording per-node stats.
+- [ ] 6. Course explorer: board, arrows, move list, comments, stats box,
+         colour-coded moves (19, 20.2, 20.3). Replaces the course page.
+- [ ] 7. Explorer actions: Practice from here, Practice this line only,
+         Watch this line (18.3, 19).
+- [ ] 8. Cover every line (18.4).
+- [ ] 9. Practice weak spots (18.5) and the new course card summary (20.1).
+- [ ] 10. Polish pass on the iPhone (spacing, tap sizes, long move lists,
+          smoothness), bump the service worker version, final push.
+
+Tick a step ONLY after the user confirms it works.
+
+---
+
+## 23. Checklist: version 2 is done when…
+
+- [ ] Moves sound like wood; captures, checks and checkmates have their own
+      sounds, and all can be muted with the sound icon.
+- [ ] Checkmate shows the skull icon beside the king and ends the game.
+- [ ] The board shows coordinates, flipped correctly when I play Black.
+- [ ] The app replies after 1.5 seconds; watch waits 1.5 seconds first.
+- [ ] All text says "practice"/"practiced".
+- [ ] My existing courses survived the upgrade (stats reset to zero).
+- [ ] In the editor I can jump to any move, add side lines for the
+      opponent, promote, delete and name lines.
+- [ ] Practice picks random lines, each with an equal chance.
+- [ ] The explorer lets me browse the tree, see stats per position, and see
+      my moves colour-coded from red to green.
+- [ ] I can pick a line in the explorer and use Practice from here,
+      Practice this line only and Watch this line.
+- [ ] Cover every line goes through each line once.
+- [ ] Practice weak spots drills the moves I get wrong.
+- [ ] Export and import still work, including old version 1 backups.
+- [ ] It all works on my iPhone home-screen app, offline.
