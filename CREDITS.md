@@ -16,6 +16,12 @@ Outside libraries, images and sounds used in Chess4Me, with their source and lic
   - Source: Wikimedia Commons, e.g. https://commons.wikimedia.org/wiki/File:Chess_plt45.svg
   - Licence: the author offers a choice of GFDL, BSD or GPL. Chess4Me uses them under the **BSD** licence.
 
+- **App icon** (sketch-style knight): an original drawing made for Chess4Me by Claude Code.
+  It's a placeholder.
+  - Files: `assets/icons/icon.svg`, and PNG copies `icon-180.png`, `icon-192.png`, `icon-512.png`
+    (made from the SVG with the Edge browser).
+  - No outside source, so no outside licence.
+
 ## Sounds
 
 None yet.

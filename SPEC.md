@@ -283,8 +283,8 @@ times". Keep it subtle.
 Version 2:
 - Branches: more than one prepared reply at a position.
 - Course explorer: walk through a course's moves, choose a branch at each
-  split, then "Practise from here" (random branches after this point) or
-  "Practise this line only".
+  split, then "Practice from here" (random branches after this point) or
+  "Practice this line only".
 - Adding branches in the editor: go to a position and play a different move.
 - In practice, when there are several prepared replies, pick one at random.
 - For the performance measure, users should be able to go along the tree and see the stats update at each stage as they click through the branches.
@@ -319,7 +319,7 @@ see working in the browser. The user commits after each step.
 - [x] 10. Course editor: new course, edit, delete, comments, promotion.
 - [x] 11. Performance stats and the summary on menu cards.
 - [x] 12. Export and import.
-- [ ] 13. App icon, manifest and iPhone home-screen tags.
+- [x] 13. App icon, manifest and iPhone home-screen tags.
 - [ ] 14. Offline support (service worker).
 - [ ] 15. Polish pass on the iPhone: spacing, tap sizes, smoothness.
 
