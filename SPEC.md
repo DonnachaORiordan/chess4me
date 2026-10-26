@@ -323,7 +323,7 @@ see working in the browser. The user commits after each step.
 - [x] 12. Export and import.
 - [x] 13. App icon, manifest and iPhone home-screen tags.
 - [x] 14. Offline support (service worker).
-- [ ] 15. Polish pass on the iPhone: spacing, tap sizes, smoothness.
+- [x] 15. Polish pass on the iPhone: spacing, tap sizes, smoothness.
 
 Tick a step ONLY after the user confirms it works.
 
@@ -331,16 +331,16 @@ Tick a step ONLY after the user confirms it works.
 
 ## 14. Checklist: version 1 is done when…
 
-- [ ] I can add Chess4Me to my iPhone home screen and it opens like an app.
-- [ ] It opens and works with no internet.
-- [ ] The main menu lists my courses with a colour box, name and stats.
-- [ ] I can create a course by tapping moves for both sides, add comments,
+- [x] I can add Chess4Me to my iPhone home screen and it opens like an app.
+- [x] It opens and works with no internet.
+- [x] The main menu lists my courses with a colour box, name and stats.
+- [x] I can create a course by tapping moves for both sides, add comments,
       save it, edit it and delete it.
-- [ ] In practice my colour is at the bottom, the app replies after 3 seconds,
+- [x] In practice my colour is at the bottom, the app replies after 3 seconds,
       a wrong move shows the red X, plays a soft sound and goes back.
-- [ ] Hint highlights the right piece; Show move plays it for me.
-- [ ] Finishing shows the green tick with Restart and Main menu.
-- [ ] Watch mode plays the line through.
-- [ ] Move and incorrect sounds work and can be muted.
-- [ ] Stats update after practising.
-- [ ] I can export a backup and import it again.
+- [x] Hint highlights the right piece; Show move plays it for me.
+- [x] Finishing shows the green tick with Restart and Main menu.
+- [x] Watch mode plays the line through.
+- [x] Move and incorrect sounds work and can be muted.
+- [x] Stats update after practising.
+- [x] I can export a backup and import it again.
