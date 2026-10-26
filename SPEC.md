@@ -322,7 +322,7 @@ see working in the browser. The user commits after each step.
 - [x] 11. Performance stats and the summary on menu cards.
 - [x] 12. Export and import.
 - [x] 13. App icon, manifest and iPhone home-screen tags.
-- [ ] 14. Offline support (service worker).
+- [x] 14. Offline support (service worker).
 - [ ] 15. Polish pass on the iPhone: spacing, tap sizes, smoothness.
 
 Tick a step ONLY after the user confirms it works.
