@@ -23,6 +23,15 @@
 }
 
 /* ===== Page ===== */
+
+/* No double-tap zoom anywhere (e.g. tapping a button twice quickly), and
+   stop iPhones enlarging the text by themselves when the phone is turned sideways */
+html {
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   font-family: Arial, sans-serif;
   background-color: var(--background);
@@ -60,10 +69,20 @@ h2 {
   font-size: 16px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.15s, transform 0.1s;
 }
 
-.button:hover:not(:disabled) {
-  background-color: var(--green-light);
+/* Hover colours only on devices with a mouse. On a phone they would
+   "stick" after a tap, so the button would stay the lighter colour. */
+@media (hover: hover) {
+  .button:hover:not(:disabled) {
+    background-color: var(--green-light);
+  }
+}
+
+/* Shrinks slightly while being pressed, so taps feel responsive */
+.button:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 /* Greyed-out buttons (features coming in later steps) */
@@ -79,8 +98,10 @@ h2 {
   box-shadow: inset 0 0 0 2px var(--green);
 }
 
-.button-secondary:hover:not(:disabled) {
-  background-color: #eef3ef;
+@media (hover: hover) {
+  .button-secondary:hover:not(:disabled) {
+    background-color: #eef3ef;
+  }
 }
 
 /* A red button for actions that delete or discard things */
@@ -88,8 +109,10 @@ h2 {
   background-color: var(--danger);
 }
 
-.button-danger:hover:not(:disabled) {
-  background-color: #a93226;
+@media (hover: hover) {
+  .button-danger:hover:not(:disabled) {
+    background-color: #a93226;
+  }
 }
 
 /* A row of buttons that wraps onto a new line on narrow screens */
@@ -113,10 +136,13 @@ h2 {
   line-height: 1;
 }
 
-/* The plain "← Back" link-style button at the top of a screen */
+/* The plain "← Back" link-style button at the top of a screen.
+   The padding makes it easier to tap; the matching negative margin
+   keeps the text where it was. */
 .back-button {
   min-height: 44px;
-  padding: 0;
+  padding: 0 12px;
+  margin: 0 -12px;
   border: none;
   background: none;
   color: var(--green);
@@ -153,8 +179,10 @@ h2 {
   transition: box-shadow 0.15s, transform 0.1s;
 }
 
-.course-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+@media (hover: hover) {
+  .course-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  }
 }
 
 /* Shrinks slightly while being pressed, so taps feel responsive */
@@ -367,6 +395,7 @@ h2 {
   border-radius: 8px;
   background-color: var(--card);
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .colour-option input {
@@ -393,8 +422,10 @@ h2 {
   -webkit-tap-highlight-color: transparent;
 }
 
-.move-button:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+@media (hover: hover) {
+  .move-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
 }
 
 .move-button.selected {
@@ -468,10 +499,13 @@ h2 {
   border-radius: 8px;
   background-color: var(--square-light);
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.promotion-choice:hover {
-  background-color: var(--selected-light);
+@media (hover: hover) {
+  .promotion-choice:hover {
+    background-color: var(--selected-light);
+  }
 }
 
 .promotion-choice img {
