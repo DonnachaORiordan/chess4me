@@ -56,6 +56,8 @@ chess4me/
   CLAUDE.md         standing instructions for Claude Code
   CREDITS.md        sources and licences of outside files
   manifest.json     PWA settings (added in a later step)
+  sw.js             service worker for offline support (must be in the top
+                    folder so it covers the whole app)
   css/
     style.css
   js/

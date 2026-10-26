@@ -262,3 +262,9 @@ setupBoard(document.getElementById("board"));
 
 // Open on the main menu.
 showMainMenu();
+
+// Switch on offline support (see sw.js). Browsers only allow this on a real
+// website, so it's skipped when index.html is opened by double-clicking (file://).
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  navigator.serviceWorker.register("sw.js");
+}
