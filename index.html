@@ -175,13 +175,16 @@
         <!-- "White to move" / "Black to move" (filled in by editor.js) -->
         <p id="editor-status" class="status"></p>
 
+        <!-- Back / forward one move (forward follows the main line), and Undo -->
         <div class="button-row button-row-tight">
+          <button id="editor-back" class="button arrow-button" aria-label="Back one move" title="Back one move">&lsaquo;</button>
+          <button id="editor-forward" class="button arrow-button" aria-label="Forward one move" title="Forward one move">&rsaquo;</button>
           <button id="editor-undo" class="button button-secondary">Undo last move</button>
         </div>
 
-        <!-- The moves entered so far: tap one to add a comment (filled in by editor.js) -->
+        <!-- The whole move tree: tap a move to jump to it and comment on it (filled in by editor.js) -->
         <div id="editor-move-list" class="move-list"></div>
-        <p id="editor-help" class="help-text">Tap a move to add a comment.</p>
+        <p id="editor-help" class="help-text">Tap a move to jump to it and add a comment. Play a different opponent move from there to add a side line.</p>
 
         <!-- Comment box for the tapped move (shown when a move is tapped) -->
         <div id="editor-comment-panel" class="comment-panel" hidden>

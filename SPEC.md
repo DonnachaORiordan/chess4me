@@ -140,13 +140,18 @@ Files can be split differently if there's a good reason, but explain why first.
   tapping a piece and then tapping the square it should go to.
 - Only legal moves are allowed (chess.js).
 - Pawn promotion: show a small choice of pieces (queen, rook, bishop, knight).
-- The move list is shown next to/below the board.
-- "Undo last move" button.
-- Comments: the user can tap any move in the move list and add, edit or
-  delete a comment for it. Comments are optional.
+- The move list is shown next to/below the board. It shows the whole tree,
+  with side lines (section 17.4).
+- Back and forward arrows (forward follows the main line at splits).
+- "Undo last move" button: removes the current move, only if it is the end
+  of a line (otherwise greyed out).
+- Tapping any move in the move list jumps to the position after it
+  (section 17.2) and opens its comment box, where the user can add, edit or
+  delete a comment. Comments are optional. The box isn't focused
+  automatically, so the iPhone keyboard only appears when the user taps it.
 - "Save" and "Cancel" buttons.
-- Editing an existing course opens it with its moves already played on the
-  board, so moves can be added to the end or undone.
+- Editing an existing course opens it at the end of the main line, with its
+  moves already played on the board.
 
 ### 6.4 Practice mode
 - The board is always shown with the user's colour at the bottom.
@@ -486,6 +491,9 @@ version so the iPhone picks up the update.
     "Replace 4.c3 with 4.d3? This deletes the 5 moves after it." Only replace
     if the user confirms.
 - The forward/back arrows in the editor follow the main line at splits.
+- (Done in build step 3:) a new opponent move at a position that has no
+  replies yet simply continues the line. "Undo last move" already follows
+  the 17.3 rule (end of a line only).
 
 ### 17.3 Managing branches in the editor
 - "Make main line": promotes a side line to be the main line at its split.
@@ -669,7 +677,7 @@ part of step 1).
             spelling changes. — 1c done
 - [ ] 2. Data upgrade to dataVersion 2 (section 21), with per-node stats.
          Existing courses still load and practice as before; stats reset.
-- [ ] 3. Editor: jump to any move, add side lines, own-move replace
+- [x] 3. Editor: jump to any move, add side lines, own-move replace
          confirmation, and the branched move list display (17.2, 17.4).
 - [ ] 4. Editor: make main line, delete from here, undo rules, line names
          (17.3).

@@ -359,16 +359,51 @@ h2 {
   font-weight: bold;
 }
 
-/* The move list: three columns (number, White's move, Black's move) */
+/* The move list (drawn by renderMoveTree in app.js) */
 .move-list {
+  font-size: 16px;
+}
+
+/* Main line rows: three columns (number, White's move, Black's move) */
+.move-row {
   display: grid;
   grid-template-columns: 2.5em 1fr 1fr;
   gap: 4px 8px;
-  font-size: 16px;
+  align-items: center;
+  margin-bottom: 4px;
 }
 
 .move-number {
   color: #888888;
+}
+
+/* Side lines: in brackets, indented under the move where they split, slightly muted.
+   A side line inside a side line sits inside this box, so it is indented further. */
+.move-variation {
+  margin: 0 0 4px 1.25em;
+  padding-left: 8px;
+  border-left: 2px solid var(--border);
+  color: #6f6f6f;
+  font-size: 15px;
+}
+
+/* The moves of a side line flow along like text */
+.move-variation-text > * {
+  margin-right: 4px;
+}
+
+.move-variation .move-button {
+  padding: 0 4px;
+  font-size: 15px;
+}
+
+.move-bracket {
+  color: #999999;
+}
+
+/* No gap after an opening bracket: "(3..." */
+.move-variation-text > .move-bracket:first-child {
+  margin-right: 0;
 }
 
 /* ===== Course editor ===== */
@@ -429,11 +464,7 @@ h2 {
   margin: 0;
 }
 
-/* Moves in the editor's move list are buttons (tap to comment) */
-.move-list {
-  align-items: center;
-}
-
+/* Moves in the editor's move list are buttons (tap to jump to that move) */
 .move-button {
   min-height: 44px;
   padding: 0 8px;

@@ -22,52 +22,119 @@ function colourName(colour) {
   return colour === "white" ? "White" : "Black";
 }
 
-// Shows a list of moves (e.g. ["e4", "e5", "Nf3"]) in the move list with the given id,
-// laid out as "1. e4 e5  2. Nf3". Used by practice, watch mode and the editor.
-// "options" is only used by the editor, to make the moves tappable:
-//   options.onMoveTap(index)  - called when a move is tapped (0 = first move)
-//   options.selectedIndex     - the move to highlight
-//   options.hasComment(index) - true if the move should show a comment dot
-function renderMoveList(listId, moves, options) {
-  options = options || {};
+// ===== Move list =====
+// ALL move list drawing is here, so its look can easily be changed in one place.
+
+// Shows a simple list of moves (e.g. ["e4", "e5", "Nf3"]) in the move list with the given id.
+// Used by practice and watch mode (the moves played so far).
+function renderMoveList(listId, moves) {
+  renderMoveTree(listId, lineToTree(moves), {});
+}
+
+// Shows a whole move tree (a list of possible first moves, see storage.js), chess.com style:
+// the main line in rows ("1. e4 e5"), and side lines in brackets, indented under the move
+// where they split, e.g. "(3... Nf6 4. Ng5)". Side lines inside side lines are indented further.
+// "options" makes the moves tappable (the editor):
+//   options.onMoveTap(path) - called when a move is tapped, with the list of moves
+//                             (tree nodes) from the start up to and including it
+//   options.currentNode     - the move (tree node) to highlight
+function renderMoveTree(listId, tree, options) {
   const list = document.getElementById(listId);
   list.innerHTML = "";
+  writeMoveLine(list, tree, 0, [], true, options || {});
+}
 
-  for (let i = 0; i < moves.length; i += 2) {
-    addMoveListCell(list, (i / 2 + 1) + ".", "move-number"); // move number
-    addMoveListMove(list, moves, i, options);                // White's move
-    if (i + 1 < moves.length) {
-      addMoveListMove(list, moves, i + 1, options);          // Black's move
-    } else {
-      addMoveListCell(list, "", "move");                     // Black hasn't moved yet
+// Writes one line of the tree into "container". "choices" are the possible moves at this
+// point (ply 0 = White's first move, 1 = Black's first move...). The first choice is the
+// one followed; any others are written as side lines underneath it.
+// "path" = the moves leading here. "isMain" = true for the main line (written in rows).
+function writeMoveLine(container, choices, ply, path, isMain, options) {
+  let row = null; // the row (main line) or stretch of text (side line) being written
+  let isFirst = true;
+
+  while (choices.length > 0) {
+    const node = choices[0];
+    const isWhite = (ply % 2 === 0);
+    const number = Math.floor(ply / 2) + 1;
+
+    // Start a new row / stretch of text if needed.
+    if (!row) {
+      row = document.createElement("div");
+      row.className = isMain ? "move-row" : "move-variation-text";
+      container.appendChild(row);
+      if (!isMain && isFirst) addMoveText(row, "(", "move-bracket");
+      if (!isWhite) {
+        // Starts with Black's move: "3... Nf6" (side line), or "3." + "…" + "Nf6" (main line row)
+        if (isMain) {
+          addMoveText(row, number + ".", "move-number");
+          addMoveText(row, "…", "move-number");
+        } else {
+          addMoveText(row, number + "...", "move-number");
+        }
+      }
     }
+    if (isWhite) addMoveText(row, number + ".", "move-number");
+
+    const nodePath = path.concat(node);
+    addMoveToList(row, node, nodePath, options);
+    isFirst = false;
+
+    // Main line: Black's move ends the row.
+    if (isMain && !isWhite) row = null;
+
+    // Side lines split off here: write each one underneath, then carry on with this line.
+    const sideLines = choices.slice(1);
+    if (sideLines.length > 0) {
+      row = null;
+      sideLines.forEach(function (side) {
+        const box = document.createElement("div");
+        box.className = "move-variation";
+        container.appendChild(box);
+        writeMoveLine(box, [side], ply, path, false, options);
+      });
+    }
+
+    choices = node.children;
+    path = nodePath;
+    ply++;
+  }
+
+  // Close a side line's bracket.
+  if (!isMain) {
+    if (!row) {
+      row = document.createElement("div");
+      row.className = "move-variation-text";
+      container.appendChild(row);
+    }
+    addMoveText(row, ")", "move-bracket");
   }
 }
 
-// Adds one piece of text to a move list grid.
-function addMoveListCell(list, text, className) {
-  const cell = document.createElement("span");
-  cell.className = className;
-  cell.textContent = text;
-  list.appendChild(cell);
+// Adds a piece of plain text (a move number or bracket) to the move list.
+function addMoveText(container, text, className) {
+  const span = document.createElement("span");
+  span.className = className;
+  span.textContent = text;
+  container.appendChild(span);
 }
 
-// Adds one move to a move list grid: plain text, or a button if moves can be tapped.
-function addMoveListMove(list, moves, index, options) {
+// Adds one move to the move list: plain text, or a button if moves can be tapped.
+// Moves with a comment get a small dot.
+function addMoveToList(container, node, path, options) {
   if (!options.onMoveTap) {
-    addMoveListCell(list, moves[index], "move");
+    addMoveText(container, node.move, "move");
     return;
   }
 
   const button = document.createElement("button");
   button.className = "move-button";
-  button.textContent = moves[index];
-  if (index === options.selectedIndex) button.classList.add("selected");
-  if (options.hasComment && options.hasComment(index)) button.classList.add("has-comment");
+  button.textContent = node.move;
+  if (node === options.currentNode) button.classList.add("selected");
+  if (node.comment && node.comment.trim() !== "") button.classList.add("has-comment");
   button.addEventListener("click", function () {
-    options.onMoveTap(index);
+    options.onMoveTap(path);
   });
-  list.appendChild(button);
+  container.appendChild(button);
 }
 
 // ===== Pop-up messages and questions =====
