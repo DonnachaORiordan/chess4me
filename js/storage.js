@@ -108,6 +108,28 @@ function getMainLine(moves) {
   return line;
 }
 
+// Lists every complete line in a move tree: one list of moves (tree nodes) from the
+// first move to the end, for each end of a line. A tree with no side lines has one line.
+// "start" (optional) = moves already played: only lines that begin with them are listed.
+function getAllLines(moves, start) {
+  start = start || [];
+  const lines = [];
+  function walk(choices, line) {
+    if (choices.length === 0) {
+      if (line.length > 0) lines.push(line);
+      return;
+    }
+    // While following "start", only its move is allowed at each step.
+    const depth = line.length;
+    choices.forEach(function (node) {
+      if (depth < start.length && node !== start[depth]) return;
+      walk(node.children, line.concat(node));
+    });
+  }
+  walk(moves, []);
+  return lines;
+}
+
 // Makes a complete new course.
 function makeCourse(name, colour, moves) {
   const now = new Date().toISOString();

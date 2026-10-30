@@ -12,10 +12,16 @@ const practiceState = {
   nextMoves: [],    // the possible next moves in the course's move tree
   played: [],       // the moves played so far (e.g. ["e4", "e5"]), for the move list
   path: [],         // the same moves, written as in the course (used to name moves in the stats)
+  pathNodes: [],    // the same moves, as tree nodes
+  plan: [],         // the complete line chosen for this run (tree nodes), see chooseLine
   timer: null,      // the waiting timer (app's move, or wrong move going back), if any
   helpedThisMove: false, // true once the user has made a mistake or had help on the current move
   hintThisMove: false    // true once a hint has been counted for the current move
 };
+
+// The last line practiced in each course (by course id), so the same line
+// isn't practiced twice in a row. Remembered until the app is closed.
+const lastLineByCourse = {};
 
 // Starts practicing a course from the beginning.
 function startPractice(courseId) {
@@ -32,6 +38,8 @@ function startPractice(courseId) {
   practiceState.nextMoves = course.moves;
   practiceState.played = [];
   practiceState.path = [];
+  practiceState.pathNodes = [];
+  practiceState.plan = chooseLine([]);
 
   // Count this as one more practice. (Filling in any missing stats with zeros first.)
   course.stats = Object.assign(makeEmptyStats(), course.stats);
@@ -55,6 +63,33 @@ function startPractice(courseId) {
   showScreen("practice-screen");
 
   continuePractice();
+}
+
+// ===== Choosing a line =====
+
+// Picks the complete line to practice, at random, from the lines that begin with
+// "start" (the moves played so far, as tree nodes). Every complete line has the SAME
+// chance, so short side lines aren't favoured. If there's more than one line,
+// the line practiced last time isn't picked again straight away.
+function chooseLine(start) {
+  const courseId = practiceState.course.id;
+  const lines = getAllLines(practiceState.course.moves, start);
+  let choices = lines.filter(function (line) { return lineKey(line) !== lastLineByCourse[courseId]; });
+  if (choices.length === 0) choices = lines; // only one line: it has to be that one
+
+  const line = choices[Math.floor(Math.random() * choices.length)] || [];
+  lastLineByCourse[courseId] = lineKey(line);
+  return line;
+}
+
+// A line written as text, e.g. "e4 e5 Nf3", to tell lines apart.
+function lineKey(line) {
+  return line.map(function (node) { return node.move; }).join(" ");
+}
+
+// The move the chosen line plays next (a tree node).
+function expectedNode() {
+  return practiceState.plan[practiceState.pathNodes.length] || practiceState.nextMoves[0];
 }
 
 // Stops any waiting timer (e.g. when leaving practice mode).
@@ -90,12 +125,11 @@ function continuePractice() {
   }
 }
 
-// The app plays the prepared move for the other colour.
+// The app plays the prepared move for the other colour, along the chosen line.
 function playAppMove() {
   practiceState.timer = null;
 
-  // Version 1 has only one prepared reply, so take the first.
-  const node = practiceState.nextMoves[0];
+  const node = expectedNode();
   const move = practiceState.game.move(node.move);
   if (!move) {
     setPracticeStatus("This course has a move that isn't legal here: " + node.move);
@@ -120,9 +154,16 @@ function handlePracticeMove(move) {
   if (node) {
     // Correct. It only counts towards accuracy if there was no mistake or help on this move.
     stats.userMoves++;
-    if (!practiceState.helpedThisMove) stats.correctFirstTry++;
-    savePracticeStats();
-    acceptMove(node, move);
+    if (!practiceState.helpedThisMove) {
+      stats.correctFirstTry++;
+      getNodeStats(stats, practiceState.path.concat(node.move).join(" ")).correctFirstTry++;
+    }
+    // If the course has more than one move for the user here (not normally the case),
+    // pick a new line that goes through the move they chose.
+    if (node !== expectedNode()) {
+      practiceState.plan = chooseLine(practiceState.pathNodes.concat(node));
+    }
+    acceptMove(node, move); // (saves the stats)
     return;
   }
 
@@ -151,10 +192,14 @@ function handlePracticeMove(move) {
 }
 
 // Keeps a correct move (the user's or the app's) and moves on through the course.
+// Counts the move's position as reached once more, and saves the stats.
 function acceptMove(node, move) {
   practiceState.played.push(move.san);
   practiceState.path.push(node.move);
+  practiceState.pathNodes.push(node);
   practiceState.nextMoves = node.children;
+  getNodeStats(practiceState.course.stats, practiceState.path.join(" ")).reached++;
+  savePracticeStats();
   clearHint();
   showMove(move);
   playSoundForMove(move);
@@ -180,8 +225,7 @@ function finishPractice() {
 // Finds the move the user should play next, as a chess.js move (with "from" and "to" squares).
 // Returns null if there's no such move.
 function getExpectedMove() {
-  // Version 1 has only one prepared move at each point, so take the first.
-  const node = practiceState.nextMoves[0];
+  const node = expectedNode();
   if (!node) return null;
   const legalMoves = practiceState.game.moves({ verbose: true });
   return legalMoves.find(function (m) { return sameMove(node.move, m.san); }) || null;
@@ -198,6 +242,7 @@ function giveHint() {
     practiceState.hintThisMove = true;
     practiceState.helpedThisMove = true;
     practiceState.course.stats.hintsUsed++;
+    getNodeStats(practiceState.course.stats, currentMoveKey()).hintsUsed++;
     savePracticeStats();
   }
 }
@@ -205,7 +250,7 @@ function giveHint() {
 // "Show move": plays the correct move for the user.
 // Counts as a move shown, and as one of the user's moves (but not a correct one).
 function showCorrectMove() {
-  const node = practiceState.nextMoves[0];
+  const node = expectedNode();
   if (!node) return;
   setBoardLocked(true); // drops any piece the user had selected
   const move = practiceState.game.move(node.move);
@@ -217,8 +262,8 @@ function showCorrectMove() {
   const stats = practiceState.course.stats;
   stats.movesShown++;
   stats.userMoves++;
-  savePracticeStats();
-  acceptMove(node, move);
+  getNodeStats(stats, currentMoveKey()).movesShown++;
+  acceptMove(node, move); // (saves the stats)
 }
 
 // ===== Stats =====
@@ -231,8 +276,7 @@ function savePracticeStats() {
 // Names the move the user is on, by the course moves leading up to and including it,
 // e.g. "e4 e5 Nf3". Used to label each move's stats.
 function currentMoveKey() {
-  // Version 1 has only one prepared move at each point, so take the first.
-  return practiceState.path.concat(practiceState.nextMoves[0].move).join(" ");
+  return practiceState.path.concat(expectedNode().move).join(" ");
 }
 
 // Makes the Hint and Show move buttons usable (true) or greyed out (false).

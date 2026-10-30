@@ -548,6 +548,12 @@ version so the iPhone picks up the update.
   the line before or during play so this holds.
 - Avoid playing exactly the same complete line twice in a row (when the
   course has more than one line).
+- (Done in build step 5:) the line is chosen at the start, at random from
+  all complete lines (each equally likely). The last line practiced in each
+  course is remembered until the app is closed, so Restart never repeats it
+  straight away. Hint and Show move follow the chosen line. Per-position
+  stats are recorded as moves are played (20.1). Until the explorer arrives
+  (steps 6 and 7), the course page's Practice button is "Practice all".
 
 ### 18.2 Practice all
 - Starts from the beginning of the course, with random branches all the way.
@@ -690,7 +696,7 @@ part of step 1).
          confirmation, and the branched move list display (17.2, 17.4).
 - [x] 4. Editor: make main line, delete from here, undo rules, line names
          (17.3).
-- [ ] 5. Practice all with random branch choice, equal chance per line, no
+- [x] 5. Practice all with random branch choice, equal chance per line, no
          repeat (18.1, 18.2), recording per-node stats.
 - [ ] 6. Course explorer: board, arrows, move list, comments, stats box,
          colour-coded moves (19, 20.2, 20.3). Replaces the course page.
