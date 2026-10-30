@@ -10,6 +10,7 @@ let audioContext = null;
 const clips = {};
 
 // How long after the mating move the checkmate sound plays, in seconds.
+// The skull icon (board.js) uses the same delay, so they appear together.
 const CHECKMATE_SOUND_DELAY = 0.3;
 
 // Runs on every tap/click/key press: creates the sound engine on the first one,

@@ -175,7 +175,9 @@ Files can be split differently if there's a good reason, but explain why first.
   shown.
 - The move list shows the moves played so far.
 - End of the line:
-  - A green circle with a white tick pops up.
+  - A green circle with a white tick pops up. If the line ends in
+    checkmate, the skull beside the checkmated king shows instead (16.2),
+    and the game is over.
   - Two buttons appear: "Restart" and "Main menu".
 - A small "back" button at the top returns to the course page at any time.
 
@@ -414,7 +416,9 @@ version so the iPhone picks up the update.
 ### 16.2 Checkmate
 - When a move gives checkmate, a small black circle with a white skull icon
   pops up beside the checkmated king: exactly the same size and positioning
-  as the red X icon for a wrong move. The checkmate sound plays.
+  as the red X icon for a wrong move. The checkmate sound plays. The skull
+  pops up at the same moment as the checkmate sound (0.3 seconds after the
+  mating move), not with the move sound.
 - The skull icon is drawn by Claude Code as an original SVG (no licence
   issues), in the same style as the red X and green tick.
 - Shown in practice, watch, the editor and the explorer.
@@ -644,7 +648,8 @@ part of step 1).
 - [ ] 1. Version 1 improvements (section 16). Do them in this order, one
          part at a time, waiting for the user to try and commit each part:
          a) Sounds: new move sound (offer 2–3 options), capture, check,
-            checkmate sounds.
+            checkmate sounds. — 1a done
+
          b) Checkmate skull icon and end of game.
          c) Board coordinates, sound/mute icons, 1.5 second timings,
             spelling changes.

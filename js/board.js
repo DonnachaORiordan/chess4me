@@ -9,7 +9,8 @@ const PIECE_NAMES = { p: "pawn", n: "knight", b: "bishop", r: "rook", q: "queen"
 // How long a piece takes to slide from one square to another, in milliseconds.
 const SLIDE_TIME = 200;
 
-// Pictures drawn in code (SVG): a red circle with a white X, and a green circle with a white tick.
+// Pictures drawn in code (SVG): a red circle with a white X, a green circle with a white tick,
+// and a black circle with a white skull (checkmate).
 const WRONG_ICON =
   '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#d64545"/>' +
   '<path d="M8 8 L16 16 M16 8 L8 16" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>';
@@ -17,6 +18,16 @@ const TICK_ICON =
   '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#3f9d4f"/>' +
   '<path d="M6.5 12.5 L10.5 16.5 L17.5 8.5" stroke="white" stroke-width="3" fill="none" ' +
   'stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const MATE_ICON =
+  '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1f1f1f"/>' +
+  // The skull: a rounded head with a jaw underneath.
+  '<path d="M12 4.6 C7.9 4.6 5.6 7.4 5.6 10.6 C5.6 12.5 6.5 13.9 7.9 14.8 L7.9 16.9 ' +
+  'C7.9 17.5 8.3 17.9 8.9 17.9 L15.1 17.9 C15.7 17.9 16.1 17.5 16.1 16.9 L16.1 14.8 ' +
+  'C17.5 13.9 18.4 12.5 18.4 10.6 C18.4 7.4 16.1 4.6 12 4.6 Z" fill="white"/>' +
+  // Eyes, nose and teeth, cut out in the background colour.
+  '<circle cx="9.5" cy="11" r="1.7" fill="#1f1f1f"/><circle cx="14.5" cy="11" r="1.7" fill="#1f1f1f"/>' +
+  '<path d="M12 12.9 L11.1 14.5 L12.9 14.5 Z" fill="#1f1f1f"/>' +
+  '<path d="M10.6 16.1 V17.9 M12 16.1 V17.9 M13.4 16.1 V17.9" stroke="#1f1f1f" stroke-width="0.7"/></svg>';
 
 // What the board currently knows about.
 const boardState = {
@@ -142,6 +153,44 @@ function updateBoard() {
       square.classList.add(isCapture ? "capture-target" : "move-target");
     }
   });
+
+  updateMateMark();
+}
+
+// Shows the skull beside the king if the position is checkmate, and removes it if not
+// (e.g. after the mating move is taken back).
+function updateMateMark() {
+  const game = boardState.game;
+  const oldMark = boardState.element.querySelector(".mate-mark");
+
+  if (!game.in_checkmate()) {
+    if (oldMark) oldMark.remove();
+    return;
+  }
+
+  // The checkmated king belongs to the side whose turn it is.
+  const kingSquare = findKing(game, game.turn());
+  if (oldMark && oldMark.parentElement.dataset.square === kingSquare) return; // already showing
+
+  if (oldMark) oldMark.remove();
+  const mark = document.createElement("div");
+  mark.className = "mate-mark";
+  mark.innerHTML = MATE_ICON;
+  // Pop up together with the checkmate sound, which plays a moment after the move (see sounds.js).
+  mark.style.animationDelay = CHECKMATE_SOUND_DELAY + "s";
+  getSquareElement(kingSquare).appendChild(mark);
+}
+
+// Finds the square (e.g. "e8") of the given colour's king ("w" or "b").
+function findKing(game, colour) {
+  for (let f = 0; f < 8; f++) {
+    for (let rank = 1; rank <= 8; rank++) {
+      const name = FILES[f] + rank;
+      const piece = game.get(name);
+      if (piece && piece.type === "k" && piece.color === colour) return name;
+    }
+  }
+  return null;
 }
 
 // ===== Animations and pop-ups =====

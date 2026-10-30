@@ -239,10 +239,12 @@ h2 {
   50%      { box-shadow: inset 0 0 0 4px transparent; }
 }
 
-/* ===== Red X and green tick ===== */
+/* ===== Red X, skull and green tick ===== */
 
-/* Red X: in the top-right corner of the square the wrong move went to */
-.wrong-mark {
+/* Red X (on the square the wrong move went to) and skull (on the checkmated king's square):
+   in the top-right corner of the square */
+.wrong-mark,
+.mate-mark {
   position: absolute;
   z-index: 3;
   top: 4%;
@@ -265,7 +267,13 @@ h2 {
   animation: pop 0.35s ease-out;
 }
 
+/* The skull waits for the checkmate sound (delay set in board.js): stay hidden until then */
+.mate-mark {
+  animation-fill-mode: backwards;
+}
+
 .wrong-mark svg,
+.mate-mark svg,
 .success-tick svg {
   display: block;
   width: 100%;

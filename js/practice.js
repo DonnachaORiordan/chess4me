@@ -67,7 +67,8 @@ function stopPractice() {
 
 // Decides what happens next: end of the line, the app's move, or the user's move.
 function continuePractice() {
-  if (practiceState.nextMoves.length === 0) {
+  // Checkmate ends the game, even if the course somehow had more moves after it.
+  if (practiceState.nextMoves.length === 0 || practiceState.game.in_checkmate()) {
     finishPractice();
     return;
   }
@@ -164,11 +165,12 @@ function acceptMove(node, move) {
 }
 
 // The end of the line has been reached: the green tick pops up.
+// If the line ended in checkmate, the skull beside the king (see board.js) shows instead.
 function finishPractice() {
   practiceState.course.stats.timesCompleted++;
   savePracticeStats();
   setBoardLocked(true);
-  showSuccessTick();
+  if (!practiceState.game.in_checkmate()) showSuccessTick();
   setPracticeStatus("End of the line. Well done!");
   document.getElementById("practice-controls").hidden = true;
   document.getElementById("practice-end").hidden = false;
