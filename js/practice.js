@@ -32,12 +32,21 @@ const coverState = {
   before: null  // the course's stats when covering started, to work out the summary at the end
 };
 
+// "Practice weak spots" (section 18.5): which DIFFERENT weak lines have been finished since the
+// user pressed "Practice weak spots" in the explorer (Restart carries on the same session).
+// Lines are written as text, e.g. "e4 e5 Nf3" (see lineKey).
+const weakState = {
+  done: {},  // the different weak lines finished so far, e.g. { "e4 e5 Nf3 Nc6": true }
+  all: {}    // every line that has been weak during this session (the "out of" number)
+};
+
 // Starts practicing a course from the beginning (always from move 1).
 // "mode" (optional) says which line the app plays:
 //   "all" (or nothing)  - Practice all: a random line (section 18.2 of SPEC.md)
 //   "fromHere"          - along "route", then random at any further splits (18.3)
 //   "lineOnly"          - along "route", then the main line at every split (18.3)
 //   "cover"             - one complete line ("route") of Cover every line (18.4; see startCover)
+//   "weak"              - one complete line ("route") with weak moves (18.5; see startWeakSpots)
 // "route" = the moves chosen in the explorer, e.g. ["e4", "e5", "Nf3"].
 function startPractice(courseId, mode, route) {
   const course = getCourse(courseId);
@@ -59,7 +68,7 @@ function startPractice(courseId, mode, route) {
 
   // The line for this run. (If the route isn't in the course any more, start from the beginning.)
   const routeNodes = findRoute(course.moves, practiceState.route) || [];
-  if (practiceState.mode === "lineOnly" || practiceState.mode === "cover") {
+  if (practiceState.mode === "lineOnly" || practiceState.mode === "cover" || practiceState.mode === "weak") {
     practiceState.plan = routeThenMainLine(course.moves, routeNodes);
   } else {
     practiceState.plan = chooseLine(practiceState.mode === "fromHere" ? routeNodes : []);
@@ -72,9 +81,14 @@ function startPractice(courseId, mode, route) {
   savePracticeStats();
 
   document.getElementById("practice-title").textContent = course.name;
+  // A small note under the name: progress when covering every line, or the weak spots count.
   const progress = document.getElementById("practice-progress");
-  progress.hidden = (practiceState.mode !== "cover");
-  progress.textContent = "Line " + (coverState.index + 1) + " of " + coverState.lines.length;
+  progress.hidden = (practiceState.mode !== "cover" && practiceState.mode !== "weak");
+  if (practiceState.mode === "cover") {
+    progress.textContent = "Line " + (coverState.index + 1) + " of " + coverState.lines.length;
+  } else if (practiceState.mode === "weak") {
+    progress.textContent = weakSpotsNote(course);
+  }
   document.getElementById("practice-end").hidden = true;
   document.getElementById("practice-controls").hidden = false;
   showComment("practice-comment", "");
@@ -140,6 +154,83 @@ function coverSummary() {
   if (userMoves > 0) parts.push("Accuracy " + Math.round(100 * correct / userMoves) + "%");
   parts.push(mistakes + (mistakes === 1 ? " mistake" : " mistakes"));
   return (count === 1 ? "The only line" : "All " + count + " lines") + " covered. " + parts.join(" · ");
+}
+
+// ===== Practice weak spots =====
+
+// Finds the lines that contain the user's weak moves: moves practiced at least once,
+// with first-try accuracy below WEAK_SPOT_BELOW (config.js). Returns a list of
+// { line, weight }, where "line" is a list of tree nodes and "weight" says how weak it is:
+// for each weak move, how far its accuracy is from 100% (e.g. 20% right adds 0.8), added up.
+function findWeakLines(course) {
+  const nodes = (course.stats && course.stats.nodes) || {};
+  const weakLines = [];
+
+  getAllLines(course.moves).forEach(function (line) {
+    let weight = 0;
+    line.forEach(function (node, ply) {
+      const isUsersMove = (ply % 2 === 0) === (course.colour === "white");
+      const key = line.slice(0, ply + 1).map(function (n) { return n.move; }).join(" ");
+      const nodeStats = nodes[key];
+      if (!isUsersMove || !nodeStats || nodeStats.reached === 0) return;
+      const accuracy = nodeStats.correctFirstTry / nodeStats.reached;
+      if (100 * accuracy < WEAK_SPOT_BELOW) weight += 1 - accuracy;
+    });
+    if (weight > 0) weakLines.push({ line: line, weight: weight });
+  });
+  return weakLines;
+}
+
+// The note under the course name, e.g. "Weak spots · 4 lines to work on · 2/4 practiced".
+// "to work on" = lines that are weak right now. "2/4 practiced" = how many DIFFERENT weak lines
+// have been finished in this session, out of all the lines that were weak during it
+// (practicing the same line again doesn't count twice).
+function weakSpotsNote(course) {
+  const weakLines = findWeakLines(course);
+  weakLines.forEach(function (w) { weakState.all[lineKey(w.line)] = true; });
+  const count = weakLines.length;
+  return "Weak spots · " + count + (count === 1 ? " line" : " lines") + " to work on · " +
+    Object.keys(weakState.done).length + "/" + Object.keys(weakState.all).length + " practiced";
+}
+
+// "Practice weak spots": practices one line with weak moves, from move 1.
+// Weaker lines are more likely to be picked. (The same line CAN come up twice in a row here:
+// a "no repeats" rule would cancel out the weighting, e.g. with 2 weak lines they'd just take turns.)
+// If there are no weak spots, says so (and goes back to the explorer).
+// "carryOn" = true when continuing the same session (Restart): keeps counting lines done.
+function startWeakSpots(courseId, carryOn) {
+  const course = getCourse(courseId);
+  if (!course) {
+    showMainMenu(); // the course no longer exists
+    return;
+  }
+  if (!carryOn) {
+    weakState.done = {};
+    weakState.all = {};
+  }
+
+  const weakLines = findWeakLines(course);
+  if (weakLines.length === 0) {
+    stopPractice();
+    showExplorer(courseId);
+    showMessage("No weak spots right now. Nice work.");
+    return;
+  }
+
+  // Pick at random, in proportion to each line's weight.
+  const total = weakLines.reduce(function (sum, w) { return sum + w.weight; }, 0);
+  let pick = Math.random() * total;
+  let chosen = weakLines[weakLines.length - 1];
+  for (let i = 0; i < weakLines.length; i++) {
+    pick -= weakLines[i].weight;
+    if (pick < 0) {
+      chosen = weakLines[i];
+      break;
+    }
+  }
+
+  lastLineByCourse[courseId] = lineKey(chosen.line);
+  startPractice(courseId, "weak", chosen.line.map(function (node) { return node.move; }));
 }
 
 // ===== Choosing a line =====
@@ -288,11 +379,19 @@ function acceptMove(node, move) {
 // The end of the line has been reached: the green tick pops up.
 // If the line ended in checkmate, the skull beside the king (see board.js) shows instead.
 // When covering every line: "Next line" continues, and after the last line a summary shows.
+// For weak spots: this line counts as done (once, however often it comes up); the note updates.
 function finishPractice() {
   practiceState.course.stats.timesCompleted++;
   savePracticeStats();
   setBoardLocked(true);
   if (!practiceState.game.in_checkmate()) showSuccessTick();
+
+  if (practiceState.mode === "weak") {
+    const key = lineKey(practiceState.plan);
+    weakState.done[key] = true;
+    weakState.all[key] = true; // (it was weak when it was picked)
+    document.getElementById("practice-progress").textContent = weakSpotsNote(practiceState.course);
+  }
 
   const covering = (practiceState.mode === "cover");
   const moreLines = covering && coverState.index < coverState.lines.length - 1;
@@ -414,9 +513,12 @@ document.getElementById("practice-show").addEventListener("click", showCorrectMo
 
 // "Restart": practice the same course again from the beginning, the same way (same mode and route).
 // After covering every line, it covers every line again (in a new random order).
+// For weak spots, it picks a weak line again.
 document.getElementById("practice-restart").addEventListener("click", function () {
   if (practiceState.mode === "cover") {
     startCover(practiceState.course.id);
+  } else if (practiceState.mode === "weak") {
+    startWeakSpots(practiceState.course.id, true); // picks a weak line again, and keeps counting
   } else {
     startPractice(practiceState.course.id, practiceState.mode, practiceState.route);
   }

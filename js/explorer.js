@@ -221,6 +221,11 @@ document.getElementById("explorer-cover").addEventListener("click", function () 
   startCover(explorerState.course.id);
 });
 
+// "Practice weak spots": lines with the user's weakest moves (see practice.js).
+document.getElementById("explorer-weak").addEventListener("click", function () {
+  startWeakSpots(explorerState.course.id);
+});
+
 // "Edit": open this course in the editor (see editor.js).
 document.getElementById("explorer-edit").addEventListener("click", function () {
   startEditor(explorerState.course.id);

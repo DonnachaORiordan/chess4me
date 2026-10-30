@@ -281,8 +281,9 @@ Per course, track:
   moves" features). Since dataVersion 2 this is part of the per-position
   stats (section 20.1).
 
-On the main menu card, show a short summary, e.g. "Accuracy 86% · Practised 12
-times". Keep it subtle.
+On the main menu card, show a short summary, e.g. "Accuracy 86% · Practiced 12
+times · 5 lines" (since build step 9; "Not practiced yet · 5 lines" before
+the first practice). Keep it subtle.
 
 ---
 
@@ -597,6 +598,21 @@ version so the iPhone picks up the update.
 - Lines with weaker moves are more likely to be chosen.
 - If there are no weak spots, show a friendly message (e.g. "No weak spots
   right now. Nice work.").
+- (Done in build step 9:) weak = a user move practiced at least once with
+  first-try accuracy below WEAK_SPOT_BELOW (config.js, 80). Each line with
+  weak moves gets a weight: for each weak move, 1 minus its accuracy, added
+  up; a line is picked in proportion to its weight. The same line CAN come
+  up twice in a row (a no-repeat rule would cancel the weighting). Each run
+  practices one weak line from move 1; Restart picks again. A note under
+  the course name, e.g. "Weak spots · 4 lines to work on · 2/4 practiced":
+  "to work on" = lines weak right now; "2/4 practiced" = how many DIFFERENT
+  weak lines were finished in this session (repeats don't count again), out
+  of all lines that were weak during the session (fixed at the start, only
+  grows if a new line becomes weak). The session starts when the explorer
+  button is pressed; Restart carries on; it updates as soon as a line ends.
+  Picks stay random and weighted (the user chose this over going through
+  each weak line once). If none are left,
+  the message shows and the app returns to the explorer.
 
 ### 18.6 Everything else stays the same
 - Red X for wrong moves, hints, show move, comments, end of line, sounds,
@@ -631,9 +647,9 @@ the course, not being tested.
 - Main actions are big, easy-to-tap buttons. Less-used ones (Edit, Delete)
   are smaller.
 - The user will try this layout and probably adjust it.
-- (Done in build steps 6 to 8:) the explorer has "Practice lines through here",
-  "Practice this line only", "Watch this line", "Practice all" and "Cover
-  every line" (big), and smaller
+- (Done in build steps 6 to 9:) the explorer has "Practice lines through here",
+  "Practice this line only", "Watch this line", "Practice all", "Cover
+  every line" and "Practice weak spots" (big), and smaller
   "Edit" and "Delete". The board is for looking only (taps do nothing).
   Stats box: "Reached N times" (or "Practiced N times" at the start),
   "This move: N mistakes · N hints · N shown" on the user's moves, and
@@ -725,7 +741,7 @@ part of step 1).
 - [x] 7. Explorer actions: Practice lines through here, Practice this line only,
          Watch this line (18.3, 19).
 - [x] 8. Cover every line (18.4).
-- [ ] 9. Practice weak spots (18.5) and the new course card summary (20.1).
+- [x] 9. Practice weak spots (18.5) and the new course card summary (20.1).
 - [ ] 10. Polish pass on the iPhone (spacing, tap sizes, long move lists,
           smoothness), bump the service worker version, final push.
 

@@ -16,3 +16,7 @@ const WATCH_DELAY = 1500;
 const TINT_RED_BELOW = 50;
 const TINT_ORANGE_BELOW = 70;
 const TINT_YELLOW_BELOW = 90;
+
+// "Practice weak spots": a user move counts as weak if it has been practiced at least once
+// and its first-try accuracy is below this (in %).
+const WEAK_SPOT_BELOW = 80;

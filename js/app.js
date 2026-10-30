@@ -255,7 +255,7 @@ function makeCourseCard(course) {
 
   const summary = document.createElement("span");
   summary.className = "course-card-stats";
-  summary.textContent = statsSummary(course.stats);
+  summary.textContent = statsSummary(course);
   text.appendChild(summary);
 
   card.appendChild(text);
@@ -266,18 +266,27 @@ function makeCourseCard(course) {
   return card;
 }
 
-// A short stats summary for a course card, e.g. "Accuracy 86% · Practiced 12 times".
+// A short stats summary for a course card, e.g. "Accuracy 86% · Practiced 12 times · 5 lines",
+// or "Not practiced yet · 5 lines".
 // (The saved names "timesPractised" etc. keep their old spelling, so saved courses still load.)
-function statsSummary(stats) {
-  if (!stats || !stats.timesPractised) return "Not practiced yet";
-
+function statsSummary(course) {
+  const stats = course.stats;
   const parts = [];
-  // Accuracy = moves right on the first try ÷ all the user's moves, as a %.
-  if (stats.userMoves > 0) {
-    parts.push("Accuracy " + Math.round(100 * stats.correctFirstTry / stats.userMoves) + "%");
+
+  if (!stats || !stats.timesPractised) {
+    parts.push("Not practiced yet");
+  } else {
+    // Accuracy = moves right on the first try ÷ all the user's moves, as a %.
+    if (stats.userMoves > 0) {
+      parts.push("Accuracy " + Math.round(100 * stats.correctFirstTry / stats.userMoves) + "%");
+    }
+    const times = stats.timesPractised;
+    parts.push("Practiced " + times + (times === 1 ? " time" : " times"));
   }
-  const times = stats.timesPractised;
-  parts.push("Practiced " + times + (times === 1 ? " time" : " times"));
+
+  // How many complete lines the course has (see storage.js).
+  const lines = getAllLines(course.moves).length;
+  parts.push(lines + (lines === 1 ? " line" : " lines"));
   return parts.join(" · ");
 }
 
