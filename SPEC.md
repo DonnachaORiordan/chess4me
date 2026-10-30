@@ -584,6 +584,11 @@ version so the iPhone picks up the update.
 - After each line ends (green tick or skull), a "Next line" button continues.
 - At the end, shows a short summary: lines done, accuracy, mistakes.
 - Can be stopped at any time with the back button.
+- (Done in build step 8:) started with "Cover every line" in the explorer.
+  Progress shows under the course name. Each line counts as one practice in
+  the stats (like any other practice run). The end summary only counts this
+  run-through, e.g. "All 7 lines covered. Accuracy 86% · 3 mistakes", with
+  Restart (cover every line again, new random order) and Main menu.
 
 ### 18.5 Practice weak spots
 - Practices only the lines that contain the user's weakest moves: user moves
@@ -626,8 +631,9 @@ the course, not being tested.
 - Main actions are big, easy-to-tap buttons. Less-used ones (Edit, Delete)
   are smaller.
 - The user will try this layout and probably adjust it.
-- (Done in build steps 6 and 7:) the explorer has "Practice lines through here",
-  "Practice this line only", "Watch this line" and "Practice all" (big), and smaller
+- (Done in build steps 6 to 8:) the explorer has "Practice lines through here",
+  "Practice this line only", "Watch this line", "Practice all" and "Cover
+  every line" (big), and smaller
   "Edit" and "Delete". The board is for looking only (taps do nothing).
   Stats box: "Reached N times" (or "Practiced N times" at the start),
   "This move: N mistakes · N hints · N shown" on the user's moves, and
@@ -718,7 +724,7 @@ part of step 1).
          colour-coded moves (19, 20.2, 20.3). Replaces the course page.
 - [x] 7. Explorer actions: Practice lines through here, Practice this line only,
          Watch this line (18.3, 19).
-- [ ] 8. Cover every line (18.4).
+- [x] 8. Cover every line (18.4).
 - [ ] 9. Practice weak spots (18.5) and the new course card summary (20.1).
 - [ ] 10. Polish pass on the iPhone (spacing, tap sizes, long move lists,
           smoothness), bump the service worker version, final push.

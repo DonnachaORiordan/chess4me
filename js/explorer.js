@@ -216,6 +216,11 @@ document.getElementById("explorer-practice").addEventListener("click", function 
   startPractice(explorerState.course.id, "all");
 });
 
+// "Cover every line": every complete line once, in random order (see practice.js).
+document.getElementById("explorer-cover").addEventListener("click", function () {
+  startCover(explorerState.course.id);
+});
+
 // "Edit": open this course in the editor (see editor.js).
 document.getElementById("explorer-edit").addEventListener("click", function () {
   startEditor(explorerState.course.id);

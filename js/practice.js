@@ -25,11 +25,19 @@ const practiceState = {
 // isn't practiced twice in a row. Remembered until the app is closed.
 const lastLineByCourse = {};
 
+// "Cover every line" (section 18.4 of SPEC.md): every complete line once, in random order.
+const coverState = {
+  lines: [],    // the lines still to do and done, in order, each as a list of moves, e.g. ["e4", "e5"]
+  index: 0,     // which line is being practiced now (0 = the first)
+  before: null  // the course's stats when covering started, to work out the summary at the end
+};
+
 // Starts practicing a course from the beginning (always from move 1).
 // "mode" (optional) says which line the app plays:
 //   "all" (or nothing)  - Practice all: a random line (section 18.2 of SPEC.md)
 //   "fromHere"          - along "route", then random at any further splits (18.3)
 //   "lineOnly"          - along "route", then the main line at every split (18.3)
+//   "cover"             - one complete line ("route") of Cover every line (18.4; see startCover)
 // "route" = the moves chosen in the explorer, e.g. ["e4", "e5", "Nf3"].
 function startPractice(courseId, mode, route) {
   const course = getCourse(courseId);
@@ -51,7 +59,7 @@ function startPractice(courseId, mode, route) {
 
   // The line for this run. (If the route isn't in the course any more, start from the beginning.)
   const routeNodes = findRoute(course.moves, practiceState.route) || [];
-  if (practiceState.mode === "lineOnly") {
+  if (practiceState.mode === "lineOnly" || practiceState.mode === "cover") {
     practiceState.plan = routeThenMainLine(course.moves, routeNodes);
   } else {
     practiceState.plan = chooseLine(practiceState.mode === "fromHere" ? routeNodes : []);
@@ -64,6 +72,9 @@ function startPractice(courseId, mode, route) {
   savePracticeStats();
 
   document.getElementById("practice-title").textContent = course.name;
+  const progress = document.getElementById("practice-progress");
+  progress.hidden = (practiceState.mode !== "cover");
+  progress.textContent = "Line " + (coverState.index + 1) + " of " + coverState.lines.length;
   document.getElementById("practice-end").hidden = true;
   document.getElementById("practice-controls").hidden = false;
   showComment("practice-comment", "");
@@ -79,6 +90,56 @@ function startPractice(courseId, mode, route) {
   showScreen("practice-screen");
 
   continuePractice();
+}
+
+// ===== Cover every line =====
+
+// "Cover every line": shuffles all the course's complete lines into a random order,
+// then practices them one after another (each one from move 1).
+function startCover(courseId) {
+  const course = getCourse(courseId);
+  if (!course) {
+    showMainMenu(); // the course no longer exists
+    return;
+  }
+
+  const lines = getAllLines(course.moves).map(function (line) {
+    return line.map(function (node) { return node.move; });
+  });
+  // Shuffle (the "Fisher-Yates" way: every order is equally likely).
+  for (let i = lines.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const swap = lines[i];
+    lines[i] = lines[j];
+    lines[j] = swap;
+  }
+
+  coverState.lines = lines;
+  coverState.index = 0;
+  coverState.before = Object.assign(makeEmptyStats(), course.stats);
+  startPractice(courseId, "cover", coverState.lines[0]);
+}
+
+// "Next line": practices the next line of Cover every line.
+function nextCoverLine() {
+  coverState.index++;
+  startPractice(practiceState.course.id, "cover", coverState.lines[coverState.index]);
+}
+
+// The summary at the end of Cover every line, e.g. "All 7 lines covered. Accuracy 86% · 3 mistakes".
+// Only counts this run-through (the stats now, minus the stats when it started).
+function coverSummary() {
+  const now = practiceState.course.stats;
+  const before = coverState.before;
+  const userMoves = now.userMoves - before.userMoves;
+  const correct = now.correctFirstTry - before.correctFirstTry;
+  const mistakes = now.mistakes - before.mistakes;
+  const count = coverState.lines.length;
+
+  const parts = [];
+  if (userMoves > 0) parts.push("Accuracy " + Math.round(100 * correct / userMoves) + "%");
+  parts.push(mistakes + (mistakes === 1 ? " mistake" : " mistakes"));
+  return (count === 1 ? "The only line" : "All " + count + " lines") + " covered. " + parts.join(" · ");
 }
 
 // ===== Choosing a line =====
@@ -226,12 +287,24 @@ function acceptMove(node, move) {
 
 // The end of the line has been reached: the green tick pops up.
 // If the line ended in checkmate, the skull beside the king (see board.js) shows instead.
+// When covering every line: "Next line" continues, and after the last line a summary shows.
 function finishPractice() {
   practiceState.course.stats.timesCompleted++;
   savePracticeStats();
   setBoardLocked(true);
   if (!practiceState.game.in_checkmate()) showSuccessTick();
-  setPracticeStatus("End of the line. Well done!");
+
+  const covering = (practiceState.mode === "cover");
+  const moreLines = covering && coverState.index < coverState.lines.length - 1;
+  if (moreLines) {
+    setPracticeStatus("End of line " + (coverState.index + 1) + " of " + coverState.lines.length + ". Well done!");
+  } else if (covering) {
+    setPracticeStatus(coverSummary());
+  } else {
+    setPracticeStatus("End of the line. Well done!");
+  }
+  document.getElementById("practice-next").hidden = !moreLines;
+  document.getElementById("practice-restart").hidden = moreLines;
   document.getElementById("practice-controls").hidden = true;
   document.getElementById("practice-end").hidden = false;
 }
@@ -340,9 +413,17 @@ document.getElementById("practice-hint").addEventListener("click", giveHint);
 document.getElementById("practice-show").addEventListener("click", showCorrectMove);
 
 // "Restart": practice the same course again from the beginning, the same way (same mode and route).
+// After covering every line, it covers every line again (in a new random order).
 document.getElementById("practice-restart").addEventListener("click", function () {
-  startPractice(practiceState.course.id, practiceState.mode, practiceState.route);
+  if (practiceState.mode === "cover") {
+    startCover(practiceState.course.id);
+  } else {
+    startPractice(practiceState.course.id, practiceState.mode, practiceState.route);
+  }
 });
+
+// "Next line" (Cover every line)
+document.getElementById("practice-next").addEventListener("click", nextCoverLine);
 
 // "Main menu"
 document.getElementById("practice-menu").addEventListener("click", function () {

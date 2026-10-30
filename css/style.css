@@ -290,6 +290,12 @@ h2 {
   align-items: center;
 }
 
+/* "Line 3 of 7" under the course name, while covering every line
+   (two classes, so it wins over the general .help-text spacing further down) */
+.help-text.practice-progress {
+  margin: -4px 0 12px;
+}
+
 /* ===== Course explorer ===== */
 
 /* Course name and colour box, in the middle of the top bar (cut short with "…" if too long) */

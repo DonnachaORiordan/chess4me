@@ -83,6 +83,7 @@
           <button id="explorer-line-only" class="button">Practice this line only</button>
           <button id="explorer-watch" class="button">Watch this line</button>
           <button id="explorer-practice" class="button">Practice all</button>
+          <button id="explorer-cover" class="button">Cover every line</button>
         </div>
 
         <!-- Less-used actions (smaller) -->
@@ -102,6 +103,8 @@
       <button id="practice-sound" class="back-button sound-toggle" aria-label="Sound"></button>
     </div>
     <h2 id="practice-title"></h2>
+    <!-- "Line 3 of 7" while covering every line (filled in by practice.js) -->
+    <p id="practice-progress" class="help-text practice-progress" hidden></p>
 
     <!-- Board on the left and the side panel on the right on wide screens;
          the side panel goes below the board on narrow screens (phones). -->
@@ -130,6 +133,8 @@
 
         <!-- Shown at the end of the line -->
         <div id="practice-end" class="button-row" hidden>
+          <!-- "Next line" is only used when covering every line -->
+          <button id="practice-next" class="button" hidden>Next line</button>
           <button id="practice-restart" class="button">Restart</button>
           <button id="practice-menu" class="button">Main menu</button>
         </div>
