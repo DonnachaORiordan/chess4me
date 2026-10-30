@@ -320,6 +320,7 @@ function isValidMoveNode(node) {
   return node !== null && typeof node === "object" &&
     typeof node.move === "string" &&
     (node.comment === undefined || typeof node.comment === "string") &&
+    (node.name === undefined || typeof node.name === "string") && // optional side line name
     Array.isArray(node.children) &&
     node.children.every(isValidMoveNode);
 }

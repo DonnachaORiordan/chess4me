@@ -401,6 +401,14 @@ h2 {
   color: #999999;
 }
 
+/* A side line's name, shown after its first move, e.g. "3... Nf6 Two Knights Defence" */
+.line-name {
+  margin-left: 4px;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--green);
+}
+
 /* No gap after an opening bracket: "(3..." */
 .move-variation-text > .move-bracket:first-child {
   margin-right: 0;

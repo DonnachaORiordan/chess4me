@@ -182,12 +182,24 @@
           <button id="editor-undo" class="button button-secondary">Undo last move</button>
         </div>
 
+        <!-- Managing side lines (for the current move) -->
+        <div class="button-row button-row-tight">
+          <button id="editor-main-line" class="button button-secondary">Make main line</button>
+          <button id="editor-delete-from" class="button button-secondary">Delete from here</button>
+        </div>
+
         <!-- The whole move tree: tap a move to jump to it and comment on it (filled in by editor.js) -->
         <div id="editor-move-list" class="move-list"></div>
         <p id="editor-help" class="help-text">Tap a move to jump to it and add a comment. Play a different opponent move from there to add a side line.</p>
 
         <!-- Comment box for the tapped move (shown when a move is tapped) -->
         <div id="editor-comment-panel" class="comment-panel" hidden>
+          <!-- Line name: only shown for the first move of a side line -->
+          <div id="editor-line-name-field" class="field" hidden>
+            <label for="editor-line-name" class="field-label">Line name (optional)</label>
+            <input id="editor-line-name" class="text-input" type="text" maxlength="60" autocomplete="off"
+              placeholder="e.g. Two Knights Defence">
+          </div>
           <label for="editor-comment" id="editor-comment-label" class="field-label"></label>
           <textarea id="editor-comment" class="text-input" rows="3" maxlength="500"></textarea>
           <div class="button-row button-row-tight">

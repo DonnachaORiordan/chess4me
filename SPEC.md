@@ -243,7 +243,10 @@ Each course has:
 - `moves`: a tree of move nodes. Each node has:
   - `move` (in standard notation, e.g. "Nf3")
   - `comment` (optional text)
-  - `children` (the possible next moves; in version 1 always zero or one)
+  - `children` (the possible next moves; the first one is the main line,
+    any others are side lines)
+  - `name` (optional: a side line's name, on its first move, e.g.
+    "Two Knights Defence". Only saved if the move has a name.)
 - `stats` (section 9)
 - `created` and `updated` dates
 
@@ -507,6 +510,12 @@ version so the iPhone picks up the update.
   line (e.g. "Two Knights Defence"). The name is shown next to that move in
   the move list and the explorer.
 - Comments work as before, on any move.
+- (Done in build step 4:) "Make main line" works on the side line the
+  current move is in, at its nearest split; for a side line inside a side
+  line, pressing it again promotes it further. "Delete from here" is only
+  blocked for the course's ONLY first move (a side line on move 1, e.g.
+  1. d4 next to 1. e4, can be deleted). The line name box appears in the
+  comment panel when the first move of a side line is tapped.
 
 ### 17.4 Move list display (all screens)
 - Show the whole tree, chess.com style:
@@ -675,11 +684,11 @@ part of step 1).
          b) Checkmate skull icon and end of game. — 1b done
          c) Board coordinates, sound/mute icons, 1.5 second timings,
             spelling changes. — 1c done
-- [ ] 2. Data upgrade to dataVersion 2 (section 21), with per-node stats.
+- [x] 2. Data upgrade to dataVersion 2 (section 21), with per-node stats.
          Existing courses still load and practice as before; stats reset.
 - [x] 3. Editor: jump to any move, add side lines, own-move replace
          confirmation, and the branched move list display (17.2, 17.4).
-- [ ] 4. Editor: make main line, delete from here, undo rules, line names
+- [x] 4. Editor: make main line, delete from here, undo rules, line names
          (17.3).
 - [ ] 5. Practice all with random branch choice, equal chance per line, no
          repeat (18.1, 18.2), recording per-node stats.

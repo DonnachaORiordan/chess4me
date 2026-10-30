@@ -227,7 +227,72 @@ function undoEditorMove() {
   updateEditorView();
 }
 
-// ===== Comments =====
+// ===== Managing side lines =====
+
+// The list of moves that the move at path[index] sits in (itself and its alternatives).
+function choicesAt(index) {
+  return index === 0 ? editorState.tree : editorState.path[index - 1].children;
+}
+
+// True if the move at path[index] is the first move of a side line (not the main choice at its split).
+function startsSideLine(index) {
+  return choicesAt(index)[0] !== editorState.path[index];
+}
+
+// Where the current move's side line splits off: the position in "path" of the nearest move
+// (going back from the current move) that isn't the main choice. -1 if the current move is on the main line.
+function sideLineSplit() {
+  for (let i = editorState.path.length - 1; i >= 0; i--) {
+    if (startsSideLine(i)) return i;
+  }
+  return -1;
+}
+
+// "Make main line": the side line the current move is in becomes the main line at its split
+// (it moves to the front of the choices there). For a side line inside a side line,
+// press again to promote it further.
+function makeMainLine() {
+  const index = sideLineSplit();
+  if (index < 0) return;
+  const choices = choicesAt(index);
+  const node = editorState.path[index];
+  choices.splice(choices.indexOf(node), 1);
+  choices.unshift(node);
+  editorState.changed = true;
+  updateEditorView();
+}
+
+// True if the current move can be deleted with "Delete from here".
+// The course's only first move can't be (that would delete the whole course: use Delete course).
+function canDeleteFromHere() {
+  const path = editorState.path;
+  return path.length > 0 && !(path.length === 1 && editorState.tree.length === 1);
+}
+
+// "Delete from here": deletes the current move and everything after it, after asking,
+// e.g. "Delete 3... Nf6 and the 6 moves after it?"
+function deleteFromHere() {
+  if (!canDeleteFromHere()) return;
+  const path = editorState.path;
+  const index = path.length - 1;
+  const node = path[index];
+  const after = countMovesAfter(node);
+  let message = "Delete " + moveName(index, node.move);
+  message += (after > 0) ? " and the " + (after === 1 ? "move" : after + " moves") + " after it?" : "?";
+
+  askConfirm(message, "Delete", function () {
+    const choices = choicesAt(index);
+    choices.splice(choices.indexOf(node), 1);
+    path.pop();
+    editorState.game = gameAfter(path);
+    editorState.changed = true;
+    closeCommentEditor();
+    showEditorBoard();
+    updateEditorView();
+  });
+}
+
+// ===== Comments and line names =====
 
 // Opens the comment box for a move. (It isn't focused, so the iPhone keyboard
 // doesn't pop up every time a move is tapped: tap the box to type.)
@@ -236,6 +301,7 @@ function openCommentEditor(node) {
   document.getElementById("editor-comment-label").textContent =
     "Comment on " + moveName(editorState.path.indexOf(node), node.move);
   document.getElementById("editor-comment").value = node.comment || "";
+  document.getElementById("editor-line-name").value = node.name || "";
   document.getElementById("editor-comment-panel").hidden = false;
   updateEditorView();
 }
@@ -260,6 +326,13 @@ function updateEditorView() {
   document.getElementById("editor-back").disabled = (editorState.path.length === 0);
   document.getElementById("editor-forward").disabled = (currentEditorChoices().length === 0);
   document.getElementById("editor-undo").disabled = (!node || node.children.length > 0);
+  document.getElementById("editor-main-line").disabled = (sideLineSplit() < 0);
+  document.getElementById("editor-delete-from").disabled = !canDeleteFromHere();
+
+  // The line name box is for the first move of a side line (or a move that already has a name).
+  const commentNode = editorState.commentNode;
+  document.getElementById("editor-line-name-field").hidden = !commentNode ||
+    !(startsSideLine(editorState.path.indexOf(commentNode)) || commentNode.name);
 
   // The whole tree. Tapping a move jumps to it. The current move is highlighted.
   renderMoveTree("editor-move-list", editorState.tree, {
@@ -308,10 +381,13 @@ function saveEditor() {
   showCoursePage(course.id);
 }
 
-// A clean copy of a move tree for saving: just the move, its comment (trimmed) and the moves after it.
+// A clean copy of a move tree for saving: just the move, its comment (trimmed),
+// its line name (only if it has one) and the moves after it.
 function tidyMoveTree(choices) {
   return choices.map(function (node) {
     const tidy = makeMoveNode(node.move, (node.comment || "").trim());
+    const name = (node.name || "").trim();
+    if (name !== "") tidy.name = name;
     tidy.children = tidyMoveTree(node.children);
     return tidy;
   });
@@ -352,6 +428,15 @@ document.querySelectorAll('input[name="editor-colour"]').forEach(function (radio
 document.getElementById("editor-back").addEventListener("click", editorBack);
 document.getElementById("editor-forward").addEventListener("click", editorForward);
 document.getElementById("editor-undo").addEventListener("click", undoEditorMove);
+document.getElementById("editor-main-line").addEventListener("click", makeMainLine);
+document.getElementById("editor-delete-from").addEventListener("click", deleteFromHere);
+
+// Typing a line name saves it into the move straight away (saved to storage with "Save").
+document.getElementById("editor-line-name").addEventListener("input", function (event) {
+  editorState.commentNode.name = event.target.value;
+  editorState.changed = true;
+  updateEditorView();
+});
 
 // Typing in the comment box saves the text into the move straight away
 // (it is saved to storage with the rest of the course when "Save" is pressed).

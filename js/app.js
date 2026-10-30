@@ -119,22 +119,31 @@ function addMoveText(container, text, className) {
 }
 
 // Adds one move to the move list: plain text, or a button if moves can be tapped.
-// Moves with a comment get a small dot.
+// Moves with a comment get a small dot. A side line's name (if it has one) follows its first move.
 function addMoveToList(container, node, path, options) {
-  if (!options.onMoveTap) {
-    addMoveText(container, node.move, "move");
-    return;
+  // A named move and its name go together in one cell, so the main line's columns stay lined up.
+  if (node.name && node.name.trim() !== "") {
+    const cell = document.createElement("span");
+    cell.className = "move-with-name";
+    container.appendChild(cell);
+    container = cell;
   }
 
-  const button = document.createElement("button");
-  button.className = "move-button";
-  button.textContent = node.move;
-  if (node === options.currentNode) button.classList.add("selected");
-  if (node.comment && node.comment.trim() !== "") button.classList.add("has-comment");
-  button.addEventListener("click", function () {
-    options.onMoveTap(path);
-  });
-  container.appendChild(button);
+  if (!options.onMoveTap) {
+    addMoveText(container, node.move, "move");
+  } else {
+    const button = document.createElement("button");
+    button.className = "move-button";
+    button.textContent = node.move;
+    if (node === options.currentNode) button.classList.add("selected");
+    if (node.comment && node.comment.trim() !== "") button.classList.add("has-comment");
+    button.addEventListener("click", function () {
+      options.onMoveTap(path);
+    });
+    container.appendChild(button);
+  }
+
+  if (node.name && node.name.trim() !== "") addMoveText(container, node.name.trim(), "line-name");
 }
 
 // ===== Pop-up messages and questions =====
