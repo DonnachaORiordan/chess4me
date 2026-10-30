@@ -297,6 +297,24 @@ h2 {
   align-items: center;
 }
 
+/* Sound on/off button: just an icon, with a tap area of at least 44 x 44 pixels */
+.sound-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+}
+
+.button.sound-toggle {
+  padding: 0 10px;
+}
+
+.sound-toggle svg {
+  display: block;
+  width: 26px;
+  height: 26px;
+}
+
 /* Phones (narrow): board on top, side panel below it */
 .practice-layout {
   display: flex;
@@ -579,6 +597,43 @@ h2 {
 
 .square-dark {
   background-color: var(--square-dark);
+}
+
+/* ===== Board coordinates =====
+   Small labels inside the edge squares: numbers top-left in the left column,
+   letters bottom-right in the bottom row. Their size follows the board's width
+   ("cqw" = 1% of the board's width, see container-type below). */
+.board {
+  container-type: inline-size;
+}
+
+.coord {
+  position: absolute;
+  z-index: 0;              /* under the pieces */
+  font-size: 11px;         /* for older browsers that don't know "cqw" */
+  font-size: clamp(10px, 3cqw, 15px);
+  font-weight: 600;
+  line-height: 1;
+  pointer-events: none;    /* taps go to the square */
+}
+
+.coord-rank {
+  top: 4%;
+  left: 5%;
+}
+
+.coord-file {
+  bottom: 4%;
+  right: 6%;
+}
+
+/* Subtle contrast: green text on cream squares, cream text on green squares */
+.square-light .coord {
+  color: var(--square-dark);
+}
+
+.square-dark .coord {
+  color: var(--square-light);
 }
 
 /* ===== Pieces ===== */

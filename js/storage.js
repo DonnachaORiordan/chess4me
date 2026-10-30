@@ -42,7 +42,7 @@ function makeEmptyStats() {
     movesShown: 0,
     correctFirstTry: 0,  // user's moves played correctly on the first try
     userMoves: 0,        // all of the user's moves (accuracy = correctFirstTry / userMoves)
-    lastPractised: null, // date, or null if never practised
+    lastPractised: null, // date, or null if never practiced
     moveMistakes: {}     // times each move was got wrong, keyed by the moves leading
                          // to it, e.g. { "e4 e5 Nf3": 2 }
   };

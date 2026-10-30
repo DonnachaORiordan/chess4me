@@ -6,7 +6,7 @@ const WRONG_MOVE_SHOW_TIME = 1000;
 
 // What practice mode currently knows about.
 const practiceState = {
-  course: null,     // the course being practised
+  course: null,     // the course being practiced
   game: null,       // the chess.js game for this practice run
   userColour: "w",  // "w" or "b": the colour the user plays
   nextMoves: [],    // the possible next moves in the course's move tree
@@ -17,7 +17,7 @@ const practiceState = {
   hintThisMove: false    // true once a hint has been counted for the current move
 };
 
-// Starts practising a course from the beginning.
+// Starts practicing a course from the beginning.
 function startPractice(courseId) {
   const course = getCourse(courseId);
   if (!course) {
@@ -265,7 +265,7 @@ document.getElementById("practice-back").addEventListener("click", function () {
 document.getElementById("practice-hint").addEventListener("click", giveHint);
 document.getElementById("practice-show").addEventListener("click", showCorrectMove);
 
-// "Restart": practise the same course again from the beginning.
+// "Restart": practice the same course again from the beginning.
 document.getElementById("practice-restart").addEventListener("click", function () {
   startPractice(practiceState.course.id);
 });

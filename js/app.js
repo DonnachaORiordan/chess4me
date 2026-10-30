@@ -174,9 +174,10 @@ function makeCourseCard(course) {
   return card;
 }
 
-// A short stats summary for a course card, e.g. "Accuracy 86% · Practised 12 times".
+// A short stats summary for a course card, e.g. "Accuracy 86% · Practiced 12 times".
+// (The saved names "timesPractised" etc. keep their old spelling, so saved courses still load.)
 function statsSummary(stats) {
-  if (!stats || !stats.timesPractised) return "Not practised yet";
+  if (!stats || !stats.timesPractised) return "Not practiced yet";
 
   const parts = [];
   // Accuracy = moves right on the first try ÷ all the user's moves, as a %.
@@ -184,7 +185,7 @@ function statsSummary(stats) {
     parts.push("Accuracy " + Math.round(100 * stats.correctFirstTry / stats.userMoves) + "%");
   }
   const times = stats.timesPractised;
-  parts.push("Practised " + times + (times === 1 ? " time" : " times"));
+  parts.push("Practiced " + times + (times === 1 ? " time" : " times"));
   return parts.join(" · ");
 }
 
@@ -215,7 +216,7 @@ function showCoursePage(courseId) {
 
 document.getElementById("course-back").addEventListener("click", showMainMenu);
 
-// "Practice": start practising this course (see practice.js).
+// "Practice": start practicing this course (see practice.js).
 document.getElementById("course-practice").addEventListener("click", function () {
   startPractice(currentCourseId);
 });

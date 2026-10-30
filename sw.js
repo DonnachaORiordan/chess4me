@@ -11,7 +11,7 @@
 importScripts("js/config.js");
 
 // Change this number to throw away all saved copies and start fresh.
-const CACHE_VERSION = 4;
+const CACHE_VERSION = 5;
 const CACHE_NAME = APP_NAME.toLowerCase() + "-v" + CACHE_VERSION;
 
 // Every file the app needs, saved when the service worker is first installed.

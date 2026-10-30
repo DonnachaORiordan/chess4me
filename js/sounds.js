@@ -132,11 +132,28 @@ function toggleSound() {
   updateSoundButtons();
 }
 
-// Updates the text of every sound button (main menu and practice) to match the setting.
+// Icons drawn in code (SVG), in the button's own text colour ("currentColor"):
+// a speaker with sound waves (sound on), and a speaker with a cross (sound off).
+const SPEAKER =
+  '<path d="M3.5 9.5 H7.5 L12.5 5 V19 L7.5 14.5 H3.5 Z" fill="currentColor" ' +
+  'stroke="currentColor" stroke-width="1" stroke-linejoin="round"/>';
+const SOUND_ON_ICON =
+  '<svg viewBox="0 0 24 24" aria-hidden="true">' + SPEAKER +
+  '<path d="M15.5 9 A4 4 0 0 1 15.5 15 M18 6.5 A7.5 7.5 0 0 1 18 17.5" fill="none" ' +
+  'stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+const SOUND_OFF_ICON =
+  '<svg viewBox="0 0 24 24" aria-hidden="true">' + SPEAKER +
+  '<path d="M16 9.5 L21 14.5 M21 9.5 L16 14.5" fill="none" ' +
+  'stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+
+// Updates the icon of every sound button (main menu, practice and watch) to match the setting.
 function updateSoundButtons() {
-  const text = isSoundOn() ? "Sound: on" : "Sound: off";
+  const on = isSoundOn();
+  const label = on ? "Sound on (tap to mute)" : "Sound off (tap to turn on)";
   document.querySelectorAll(".sound-toggle").forEach(function (button) {
-    button.textContent = text;
+    button.innerHTML = on ? SOUND_ON_ICON : SOUND_OFF_ICON;
+    button.setAttribute("aria-label", label); // read out by screen readers
+    button.title = label;                     // shown when hovering with a mouse
   });
 }
 

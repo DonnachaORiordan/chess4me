@@ -150,9 +150,9 @@ Files can be split differently if there's a good reason, but explain why first.
 
 ### 6.4 Practice mode
 - The board is always shown with the user's colour at the bottom.
-- The app plays the other colour's moves automatically, 3 seconds after the
-  user's move (or 3 seconds after starting, if the other colour moves first).
-  The 3 seconds is a setting in `config.js`.
+- The app plays the other colour's moves automatically, 1.5 seconds after the
+  user's move (or 1.5 seconds after starting, if the other colour moves first).
+  The 1.5 seconds is a setting in `config.js` (MOVE_DELAY).
 - To move, the user taps a piece (it gets highlighted and its legal
   destination squares show small dots), then taps a destination square.
   Tapping the piece again, or another of their own pieces, changes the
@@ -184,7 +184,8 @@ Files can be split differently if there's a good reason, but explain why first.
 ### 6.5 Watch mode
 - A forward and back arrow to control when to show next move
 - There should also be a button that plays through the whole line automatically, both colours, one move every
-  few seconds (same delay setting), with the move sound. It should be interuptable with a ppuase button, and a back and forward button. Should then also be able to continue the automatic play through.
+  1.5 seconds, with the move sound. After pressing Play it waits 1.5 seconds before the first move too
+  (setting WATCH_DELAY in `config.js`). It should be interuptable with a ppuase button, and a back and forward button. Should then also be able to continue the automatic play through.
 - Board shown from the user's colour.
 - Buttons: Play/Pause, Back one move, Forward one move, Restart.
 - Comments show as their move is reached.
@@ -209,8 +210,9 @@ Files can be split differently if there's a good reason, but explain why first.
 - "Incorrect" sound: clearly signals a mistake, but soft and NOT irritating.
 - Both must come from free, reusable sources (check the licence, ask the
   user, add to CREDITS.md). Do NOT use chess.com's sounds.
-- A sound on/off toggle (main menu, and also easy to reach in practice).
-  The choice is saved.
+- A sound on/off toggle (main menu, and also easy to reach in practice and
+  watch). The choice is saved. It's shown as an icon: a speaker with sound
+  waves when sound is on, a speaker with a cross when it's off (16.4).
 - Note: iPhones only allow sound after the user has tapped the page at least
   once. Handle this so sounds work reliably.
 
@@ -645,14 +647,13 @@ Build ONE step at a time, as with version 1. Each step ends with something
 the user can see working. The user commits after each step (and after each
 part of step 1).
 
-- [ ] 1. Version 1 improvements (section 16). Do them in this order, one
+- [x] 1. Version 1 improvements (section 16). Do them in this order, one
          part at a time, waiting for the user to try and commit each part:
          a) Sounds: new move sound (offer 2–3 options), capture, check,
             checkmate sounds. — 1a done
-
-         b) Checkmate skull icon and end of game.
+         b) Checkmate skull icon and end of game. — 1b done
          c) Board coordinates, sound/mute icons, 1.5 second timings,
-            spelling changes.
+            spelling changes. — 1c done
 - [ ] 2. Data upgrade to dataVersion 2 (section 21), with per-node stats.
          Existing courses still load and practice as before; stats reset.
 - [ ] 3. Editor: jump to any move, add side lines, own-move replace

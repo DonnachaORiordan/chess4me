@@ -75,7 +75,8 @@ function playWatch() {
     resetWatchPosition();
   }
   watchState.playing = true;
-  autoPlayStep();
+  updateWatchView(); // the button changes to "Pause" straight away
+  watchState.timer = setTimeout(autoPlayStep, WATCH_DELAY); // wait before the first move too
 }
 
 // Plays one move now, then waits and plays the next, until the end of the line.
@@ -83,7 +84,7 @@ function autoPlayStep() {
   watchState.timer = null;
   watchForward();
   if (watchState.playing && watchState.index < watchState.line.length) {
-    watchState.timer = setTimeout(autoPlayStep, MOVE_DELAY);
+    watchState.timer = setTimeout(autoPlayStep, WATCH_DELAY);
   } else {
     pauseWatch(); // end of the line
   }

@@ -33,12 +33,12 @@
     <!-- The course cards: app.js fills this in from the saved courses -->
     <div id="course-list" class="course-list"></div>
 
-    <!-- Sound buttons ("sound-toggle") get their text from sounds.js -->
+    <!-- Sound buttons ("sound-toggle") get their icon from sounds.js -->
     <div class="button-row">
       <button id="menu-new" class="button">New course</button>
       <button id="menu-export" class="button">Export</button>
       <button id="menu-import" class="button">Import</button>
-      <button id="menu-sound" class="button sound-toggle">Sound: on</button>
+      <button id="menu-sound" class="button sound-toggle" aria-label="Sound"></button>
     </div>
 
     <!-- Hidden file chooser, opened by the Import button (see backup.js) -->
@@ -66,7 +66,7 @@
     <!-- Back on the left, sound on/off on the right -->
     <div class="top-bar">
       <button id="practice-back" class="back-button">&larr; Back</button>
-      <button id="practice-sound" class="back-button sound-toggle">Sound: on</button>
+      <button id="practice-sound" class="back-button sound-toggle" aria-label="Sound"></button>
     </div>
     <h2 id="practice-title"></h2>
 
@@ -109,7 +109,7 @@
     <!-- Back on the left, sound on/off on the right -->
     <div class="top-bar">
       <button id="watch-exit" class="back-button">&larr; Back</button>
-      <button id="watch-sound" class="back-button sound-toggle">Sound: on</button>
+      <button id="watch-sound" class="back-button sound-toggle" aria-label="Sound"></button>
     </div>
     <h2 id="watch-title"></h2>
 

@@ -62,9 +62,23 @@ function drawBoard(boardElement, orientation) {
       // Remember the square's name (e.g. "e4") so taps know which square they hit.
       square.dataset.square = FILES[fileIndex] + rank;
 
+      // Coordinates: numbers up the left column, letters along the bottom row.
+      // They follow the orientation, so with Black at the bottom "h" is on the left and "8" at the bottom.
+      if (column === 0) addCoordinate(square, "coord-rank", rank);
+      if (row === 7) addCoordinate(square, "coord-file", FILES[fileIndex]);
+
       boardElement.appendChild(square);
     }
   }
+}
+
+// Adds a small coordinate label (a letter or number) inside a square.
+// "kind" is "coord-rank" (number, top-left corner) or "coord-file" (letter, bottom-right corner).
+function addCoordinate(square, kind, text) {
+  const label = document.createElement("span");
+  label.className = "coord " + kind;
+  label.textContent = text;
+  square.appendChild(label);
 }
 
 // Runs once when the app starts: remembers the board element and listens for taps.
