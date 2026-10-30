@@ -77,15 +77,16 @@
         <!-- The whole move tree: tap a move to jump there (filled in by explorer.js) -->
         <div id="explorer-move-list" class="move-list"></div>
 
-        <!-- Main actions (big) -->
+        <!-- Main actions (big). "This line" = the moves from the start to the current move. -->
         <div class="button-row">
+          <button id="explorer-from-here" class="button">Practice lines through here</button>
+          <button id="explorer-line-only" class="button">Practice this line only</button>
+          <button id="explorer-watch" class="button">Watch this line</button>
           <button id="explorer-practice" class="button">Practice all</button>
-          <!-- Temporary until build step 7 replaces it with "Watch this line" -->
-          <button id="explorer-watch" class="button">Watch</button>
         </div>
 
         <!-- Less-used actions (smaller) -->
-        <div class="button-row button-row-tight">
+        <div class="button-row button-row-tight explorer-small-actions">
           <button id="explorer-edit" class="button button-secondary button-small">Edit</button>
           <button id="explorer-delete" class="button button-secondary button-small">Delete</button>
         </div>

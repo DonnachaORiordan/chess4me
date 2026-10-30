@@ -316,6 +316,11 @@ h2 {
   line-height: 1.5;
 }
 
+/* A little space between the big buttons and the smaller Edit / Delete row */
+.explorer-small-actions {
+  margin-top: 16px;
+}
+
 /* Smaller buttons for less-used actions (still 44px tall, so easy to tap) */
 .button-small {
   padding: 0 14px;

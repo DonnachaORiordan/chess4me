@@ -108,6 +108,27 @@ function getMainLine(moves) {
   return line;
 }
 
+// Finds a route in a move tree from its moves, e.g. findRoute(course.moves, ["e4", "e5"]).
+// Returns the list of tree nodes, or null if the tree doesn't have that route.
+function findRoute(moves, sans) {
+  const route = [];
+  let choices = moves;
+  for (let i = 0; i < sans.length; i++) {
+    const node = choices.find(function (n) { return n.move === sans[i]; });
+    if (!node) return null;
+    route.push(node);
+    choices = node.children;
+  }
+  return route;
+}
+
+// A route followed by the main line from its end to the end of the course,
+// e.g. the moves to 3... Nf6, then the first choice at every split after it.
+function routeThenMainLine(moves, route) {
+  const after = route.length > 0 ? route[route.length - 1].children : moves;
+  return route.concat(getMainLine(after));
+}
+
 // Lists every complete line in a move tree: one list of moves (tree nodes) from the
 // first move to the end, for each end of a line. A tree with no side lines has one line.
 // "start" (optional) = moves already played: only lines that begin with them are listed.

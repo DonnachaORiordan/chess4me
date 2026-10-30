@@ -14,7 +14,9 @@ const practiceState = {
   path: [],         // the same moves, written as in the course (used to name moves in the stats)
   pathNodes: [],    // the same moves, as tree nodes
   plan: [],         // the complete line chosen for this run (tree nodes), see chooseLine
-  timer: null,      // the waiting timer (app's move, or wrong move going back), if any
+  mode: "all",      // "all", "fromHere" or "lineOnly" (see startPractice)
+  route: [],        // for "fromHere" and "lineOnly": the moves chosen in the explorer, e.g. ["e4", "e5"]
+  timer: null,     // the waiting timer (app's move, or wrong move going back), if any
   helpedThisMove: false, // true once the user has made a mistake or had help on the current move
   hintThisMove: false    // true once a hint has been counted for the current move
 };
@@ -23,8 +25,13 @@ const practiceState = {
 // isn't practiced twice in a row. Remembered until the app is closed.
 const lastLineByCourse = {};
 
-// Starts practicing a course from the beginning.
-function startPractice(courseId) {
+// Starts practicing a course from the beginning (always from move 1).
+// "mode" (optional) says which line the app plays:
+//   "all" (or nothing)  - Practice all: a random line (section 18.2 of SPEC.md)
+//   "fromHere"          - along "route", then random at any further splits (18.3)
+//   "lineOnly"          - along "route", then the main line at every split (18.3)
+// "route" = the moves chosen in the explorer, e.g. ["e4", "e5", "Nf3"].
+function startPractice(courseId, mode, route) {
   const course = getCourse(courseId);
   if (!course) {
     showMainMenu(); // the course no longer exists
@@ -33,13 +40,22 @@ function startPractice(courseId) {
 
   stopPractice(); // cancel anything left over from a previous run
   practiceState.course = course;
+  practiceState.mode = mode || "all";
+  practiceState.route = route || [];
   practiceState.game = new Chess();
   practiceState.userColour = (course.colour === "white") ? "w" : "b";
   practiceState.nextMoves = course.moves;
   practiceState.played = [];
   practiceState.path = [];
   practiceState.pathNodes = [];
-  practiceState.plan = chooseLine([]);
+
+  // The line for this run. (If the route isn't in the course any more, start from the beginning.)
+  const routeNodes = findRoute(course.moves, practiceState.route) || [];
+  if (practiceState.mode === "lineOnly") {
+    practiceState.plan = routeThenMainLine(course.moves, routeNodes);
+  } else {
+    practiceState.plan = chooseLine(practiceState.mode === "fromHere" ? routeNodes : []);
+  }
 
   // Count this as one more practice. (Filling in any missing stats with zeros first.)
   course.stats = Object.assign(makeEmptyStats(), course.stats);
@@ -323,9 +339,9 @@ document.getElementById("practice-back").addEventListener("click", function () {
 document.getElementById("practice-hint").addEventListener("click", giveHint);
 document.getElementById("practice-show").addEventListener("click", showCorrectMove);
 
-// "Restart": practice the same course again from the beginning.
+// "Restart": practice the same course again from the beginning, the same way (same mode and route).
 document.getElementById("practice-restart").addEventListener("click", function () {
-  startPractice(practiceState.course.id);
+  startPractice(practiceState.course.id, practiceState.mode, practiceState.route);
 });
 
 // "Main menu"

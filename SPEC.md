@@ -319,7 +319,7 @@ times". Keep it subtle.
 Version 2 (now fully planned in sections 15–23):
 - Branches: more than one prepared reply at a position.
 - Course explorer: walk through a course's moves, choose a branch at each
-  split, then "Practice from here" (random branches after this point) or
+  split, then "Practice lines through here" (random branches after this point) or
   "Practice this line only".
 - Adding branches in the editor: go to a position and play a different move.
 - In practice, when there are several prepared replies, pick one at random.
@@ -560,16 +560,23 @@ version so the iPhone picks up the update.
 ### 18.2 Practice all
 - Starts from the beginning of the course, with random branches all the way.
 
-### 18.3 Practice from here / Practice this line only (from the explorer)
+### 18.3 Practice lines through here / Practice this line only (from the explorer)
 - The user first picks a position in the explorer by tapping a move (section
   19). The route from the start to that move is the "chosen route".
 - In BOTH modes, practice starts from move 1. The user plays their own moves
   all the way, and the app plays the opponent moves along the chosen route
   (not random). These moves count towards the stats like any other.
-- "Practice from here": after the chosen position, any further splits are
+- (Renamed from "Practice from here" after step 7, because practice still
+  starts at move 1: the line just has to pass through the chosen move.)
+- "Practice lines through here": after the chosen position, any further splits are
   random (section 18.1).
 - "Practice this line only": after the chosen position, follow the main line
   at every split to the end.
+- (Done in build step 7:) Restart repeats the same mode with the same
+  route. With no move chosen (explorer at the start), "Practice lines through here"
+  is the same as Practice all, and "Practice this line only" and "Watch this
+  line" follow the main line. Leaving practice or watch returns to the
+  explorer at the start position.
 
 ### 18.4 Cover every line
 - Goes through every complete line in the course once, in random order.
@@ -608,7 +615,7 @@ the course, not being tested.
 - Comments for the current move are shown.
 - A small stats box for the current position (section 20.2).
 - Buttons:
-  - "Practice from here" (section 18.3)
+  - "Practice lines through here" (section 18.3)
   - "Practice this line only" (section 18.3)
   - "Watch this line": watch mode (section 6.5) along the chosen route, then
     the main line to the end.
@@ -619,8 +626,8 @@ the course, not being tested.
 - Main actions are big, easy-to-tap buttons. Less-used ones (Edit, Delete)
   are smaller.
 - The user will try this layout and probably adjust it.
-- (Done in build step 6:) the explorer has "Practice all", a temporary
-  "Watch" (main line) until step 7 adds "Watch this line", and smaller
+- (Done in build steps 6 and 7:) the explorer has "Practice lines through here",
+  "Practice this line only", "Watch this line" and "Practice all" (big), and smaller
   "Edit" and "Delete". The board is for looking only (taps do nothing).
   Stats box: "Reached N times" (or "Practiced N times" at the start),
   "This move: N mistakes · N hints · N shown" on the user's moves, and
@@ -709,7 +716,7 @@ part of step 1).
          repeat (18.1, 18.2), recording per-node stats.
 - [x] 6. Course explorer: board, arrows, move list, comments, stats box,
          colour-coded moves (19, 20.2, 20.3). Replaces the course page.
-- [ ] 7. Explorer actions: Practice from here, Practice this line only,
+- [x] 7. Explorer actions: Practice lines through here, Practice this line only,
          Watch this line (18.3, 19).
 - [ ] 8. Cover every line (18.4).
 - [ ] 9. Practice weak spots (18.5) and the new course card summary (20.1).
@@ -734,7 +741,7 @@ Tick a step ONLY after the user confirms it works.
 - [ ] Practice picks random lines, each with an equal chance.
 - [ ] The explorer lets me browse the tree, see stats per position, and see
       my moves colour-coded from red to green.
-- [ ] I can pick a line in the explorer and use Practice from here,
+- [ ] I can pick a line in the explorer and use Practice lines through here,
       Practice this line only and Watch this line.
 - [ ] Cover every line goes through each line once.
 - [ ] Practice weak spots drills the moves I get wrong.

@@ -12,7 +12,10 @@ const watchState = {
 };
 
 // Starts watching a course from the beginning.
-function startWatch(courseId) {
+// "route" (optional) = the moves chosen in the explorer, e.g. ["e4", "e5", "Nf3"]:
+// watch follows them, then the main line to the end ("Watch this line").
+// Without a route, it watches the main line.
+function startWatch(courseId, route) {
   const course = getCourse(courseId);
   if (!course) {
     showMainMenu(); // the course no longer exists
@@ -21,7 +24,7 @@ function startWatch(courseId) {
 
   pauseWatch(); // cancel anything left over from before
   watchState.course = course;
-  watchState.line = getMainLine(course.moves);
+  watchState.line = routeThenMainLine(course.moves, findRoute(course.moves, route || []) || []);
   document.getElementById("watch-title").textContent = course.name;
 
   placeBoard(document.getElementById("watch-board-area"));

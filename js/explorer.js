@@ -191,15 +191,29 @@ document.getElementById("explorer-start").addEventListener("click", explorerToSt
 document.getElementById("explorer-prev").addEventListener("click", explorerBack);
 document.getElementById("explorer-next").addEventListener("click", explorerForward);
 
-// "Practice all": practice the whole course, with random lines (see practice.js).
-document.getElementById("explorer-practice").addEventListener("click", function () {
-  startPractice(explorerState.course.id);
+// The "chosen route": the moves from the start to the current move, e.g. ["e4", "e5", "Nf3"].
+function explorerRoute() {
+  return explorerState.path.map(function (node) { return node.move; });
+}
+
+// "Practice lines through here": from move 1, along the chosen route, then random at any further splits.
+document.getElementById("explorer-from-here").addEventListener("click", function () {
+  startPractice(explorerState.course.id, "fromHere", explorerRoute());
 });
 
-// "Watch": watch the main line being played (see watch.js).
-// Temporary: build step 7 replaces it with "Watch this line".
+// "Practice this line only": from move 1, along the chosen route, then the main line to the end.
+document.getElementById("explorer-line-only").addEventListener("click", function () {
+  startPractice(explorerState.course.id, "lineOnly", explorerRoute());
+});
+
+// "Watch this line": watch mode along the chosen route, then the main line to the end.
 document.getElementById("explorer-watch").addEventListener("click", function () {
-  startWatch(explorerState.course.id);
+  startWatch(explorerState.course.id, explorerRoute());
+});
+
+// "Practice all": practice the whole course, with random lines (see practice.js).
+document.getElementById("explorer-practice").addEventListener("click", function () {
+  startPractice(explorerState.course.id, "all");
 });
 
 // "Edit": open this course in the editor (see editor.js).
