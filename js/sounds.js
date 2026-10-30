@@ -1,12 +1,16 @@
-// Sounds, generated in code with the browser's built-in synthesiser (the Web Audio API),
-// so no sound files are needed. Also the sound on/off setting.
+// Sounds, played with the browser's built-in sound engine (the Web Audio API).
+// The move, capture, check and checkmate sounds are short recordings (see sound-data.js).
+// The "incorrect" sound is generated in code. Also the sound on/off setting.
 
 // The browser's sound "engine". Created on the user's first tap, because browsers
 // (especially on iPhone) don't allow sound until the user has tapped the page.
 let audioContext = null;
 
-// A short burst of random noise, used for the "click" of the move sound (made once, then reused).
-let noiseBuffer = null;
+// The recorded clips, decoded and ready to play, e.g. clips.move. Filled in once the engine starts.
+const clips = {};
+
+// How long after the mating move the checkmate sound plays, in seconds.
+const CHECKMATE_SOUND_DELAY = 0.3;
 
 // Runs on every tap/click/key press: creates the sound engine on the first one,
 // and wakes it up if the browser has paused it (e.g. after the iPhone was locked).
@@ -15,6 +19,7 @@ function unlockAudio() {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) return; // very old browser: no sound
     audioContext = new AudioContextClass();
+    decodeClips();
   }
   if (audioContext.state !== "running") {
     audioContext.resume();
@@ -30,50 +35,61 @@ function canPlaySound() {
   return isSoundOn() && audioContext !== null;
 }
 
-// ===== The two sounds =====
+// ===== The recorded sounds =====
 
-// "Move": a short wooden knock, like a piece being put down on a board.
-// It mixes a filtered click (the hard "tock") with a quick low tone (the hollow body of the wood).
-function playMoveSound() {
-  if (!canPlaySound()) return;
-  const now = audioContext.currentTime;
-
-  // Make the noise burst the first time it's needed.
-  if (!noiseBuffer) {
-    const length = Math.floor(audioContext.sampleRate * 0.06); // 0.06 seconds
-    noiseBuffer = audioContext.createBuffer(1, length, audioContext.sampleRate);
-    const samples = noiseBuffer.getChannelData(0);
-    for (let i = 0; i < length; i++) {
-      samples[i] = Math.random() * 2 - 1;
+// Turns each clip in SOUND_DATA (text) into sound the engine can play. Runs once.
+function decodeClips() {
+  Object.keys(SOUND_DATA).forEach(function (name) {
+    // Text (base64) -> raw bytes.
+    const text = atob(SOUND_DATA[name]);
+    const bytes = new Uint8Array(text.length);
+    for (let i = 0; i < text.length; i++) {
+      bytes[i] = text.charCodeAt(i);
     }
+    // Raw bytes -> playable sound. (The older "callback" style works on older iPhones too.)
+    audioContext.decodeAudioData(bytes.buffer, function (buffer) {
+      clips[name] = buffer;
+    }, function () {
+      console.warn("Couldn't decode the " + name + " sound");
+    });
+  });
+}
+
+// Plays one clip by name ("move", "capture", "check" or "checkmate"), after an optional delay in seconds.
+function playClip(name, delay) {
+  if (!canPlaySound() || !clips[name]) return;
+  const source = audioContext.createBufferSource();
+  source.buffer = clips[name];
+  source.connect(audioContext.destination);
+  source.start(audioContext.currentTime + (delay || 0));
+}
+
+// "Move": a wooden piece being put down on a board. Also used when a move is taken back.
+function playMoveSound() {
+  playClip("move");
+}
+
+// Plays the right sound for a move just made (a chess.js move):
+// check if it gives check, otherwise capture if it takes a piece, otherwise the normal move sound.
+// After a checkmating move, the checkmate sound (the king falling over) follows a moment later.
+function playSoundForMove(move) {
+  const givesCheck = move.san.indexOf("+") !== -1 || move.san.indexOf("#") !== -1;
+  const isCapture = move.flags.indexOf("c") !== -1 || move.flags.indexOf("e") !== -1; // "e" = en passant
+
+  if (givesCheck) {
+    playClip("check");
+  } else if (isCapture) {
+    playClip("capture");
+  } else {
+    playClip("move");
   }
 
-  // The click: noise, filtered so only a woody middle range is left, fading out very fast.
-  const noise = audioContext.createBufferSource();
-  noise.buffer = noiseBuffer;
-  const filter = audioContext.createBiquadFilter();
-  filter.type = "bandpass";
-  filter.frequency.value = 1100;
-  filter.Q.value = 3;
-  const clickVolume = audioContext.createGain();
-  clickVolume.gain.setValueAtTime(0.9, now);
-  clickVolume.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-  noise.connect(filter).connect(clickVolume).connect(audioContext.destination);
-
-  // The body: a low tone dropping slightly in pitch, also fading out fast.
-  const tone = audioContext.createOscillator();
-  tone.type = "sine";
-  tone.frequency.setValueAtTime(220, now);
-  tone.frequency.exponentialRampToValueAtTime(140, now + 0.08);
-  const toneVolume = audioContext.createGain();
-  toneVolume.gain.setValueAtTime(0.5, now);
-  toneVolume.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-  tone.connect(toneVolume).connect(audioContext.destination);
-
-  noise.start(now);
-  tone.start(now);
-  tone.stop(now + 0.12);
+  if (move.san.indexOf("#") !== -1) {
+    playClip("checkmate", CHECKMATE_SOUND_DELAY);
+  }
 }
+
+// ===== The generated sound =====
 
 // "Incorrect": two soft notes going down, gently fading in and out.
 function playIncorrectSound() {

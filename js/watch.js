@@ -52,7 +52,7 @@ function watchForward() {
   }
   watchState.index++;
   showMove(move);
-  playMoveSound();
+  playSoundForMove(move);
   updateWatchView();
 }
 

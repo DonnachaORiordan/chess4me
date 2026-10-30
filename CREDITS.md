@@ -24,4 +24,18 @@ Outside libraries, images and sounds used in Chess4Me, with their source and lic
 
 ## Sounds
 
-None yet.
+All four are short clips cut from longer recordings on Freesound.org, all under the
+**Creative Commons 0 (CC0)** licence (public domain: free to use and change, no conditions).
+Each clip is one tap from the recording, made mono, with its edges faded and its volume evened
+out. Files: `assets/sounds/*.wav`; the app plays the same clips from `js/sound-data.js`.
+
+- **Move** (`move.wav`): "Chess piece setting 1" by Alnotreally.
+  - Source: https://freesound.org/people/Alnotreally/sounds/801349/
+- **Capture** (`capture.wav`): "Chess_foley_1.mp3" by Amatsuuu.
+  - Source: https://freesound.org/people/Amatsuuu/sounds/629182/
+- **Check** (`check.wav`): "chess pieces.wav" by simone_ds (one of the harder put-downs).
+  - Source: https://freesound.org/people/simone_ds/sounds/366065/
+- **Checkmate** (`checkmate.wav`): "Forcefully knocking over chess piece, with roll FINAL.wav" by mht23SD.
+  - Source: https://freesound.org/people/mht23SD/sounds/707342/
+
+The "incorrect" sound is generated in code (`js/sounds.js`), so it has no outside source.

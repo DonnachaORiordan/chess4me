@@ -157,7 +157,7 @@ function acceptMove(node, move) {
   practiceState.nextMoves = node.children;
   clearHint();
   showMove(move);
-  playMoveSound();
+  playSoundForMove(move);
   showComment("practice-comment", node.comment); // or hides the box if the move has no comment
   renderMoveList("practice-move-list", practiceState.played);
   continuePractice();

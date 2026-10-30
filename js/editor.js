@@ -75,7 +75,7 @@ function handleEditorMove(move) {
   editorState.entries.push({ san: played.san, comment: "" });
   editorState.changed = true;
   showMove(played);
-  playMoveSound();
+  playSoundForMove(played);
   setEditorMessage("");
   updateEditorView();
 }

@@ -11,7 +11,7 @@
 importScripts("js/config.js");
 
 // Change this number to throw away all saved copies and start fresh.
-const CACHE_VERSION = 1;
+const CACHE_VERSION = 2;
 const CACHE_NAME = APP_NAME.toLowerCase() + "-v" + CACHE_VERSION;
 
 // Every file the app needs, saved when the service worker is first installed.
@@ -23,6 +23,7 @@ const APP_FILES = [
   "lib/chess.js",
   "js/config.js",
   "js/storage.js",
+  "js/sound-data.js",
   "js/sounds.js",
   "js/board.js",
   "js/practice.js",

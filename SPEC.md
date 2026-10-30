@@ -69,6 +69,8 @@ chess4me/
   js/
     config.js       app name and settings (e.g. APP_NAME = "Chess4Me")
     storage.js      ALL saving/loading code lives here and only here
+    sound-data.js   the recorded sound clips, stored as text
+    sounds.js       playing sounds, and the sound on/off setting
     board.js        drawing the board and handling taps
     practice.js     practice mode
     editor.js       creating and editing courses
@@ -190,7 +192,18 @@ Files can be split differently if there's a good reason, but explain why first.
 ## 7. Sounds
 
 - "Move" sound: like a wooden piece being put down on a real board.
-  Plays for every move (the user's and the app's).
+  Plays for every move (the user's and the app's), and when a move is taken
+  back (Back / Undo).
+- "Capture" sound: played instead of the move sound when a piece is captured
+  (including en passant). Castling uses the move sound.
+- "Check" sound: played instead of the move sound when a move gives check.
+  If a move captures AND gives check, the check sound plays.
+- "Checkmate" sound: a piece falling over on a wooden board. After a mating
+  move, that move's own sound (the check sound) plays, then the checkmate
+  sound 0.3 seconds later.
+- Move, capture, check and checkmate are short recorded clips (CC0, from
+  Freesound.org, see CREDITS.md), kept in `assets/sounds/` and stored as text
+  in `js/sound-data.js` so they also work when index.html is double-clicked.
 - "Incorrect" sound: clearly signals a mistake, but soft and NOT irritating.
 - Both must come from free, reusable sources (check the licence, ask the
   user, add to CREDITS.md). Do NOT use chess.com's sounds.
