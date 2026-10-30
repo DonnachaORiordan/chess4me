@@ -126,10 +126,9 @@ function handlePracticeMove(move) {
     return;
   }
 
-  // Wrong: count the mistake, overall and for this particular move.
-  const key = currentMoveKey();
+  // Wrong: count the mistake, overall and for this particular move (its position's stats, see storage.js).
   stats.mistakes++;
-  stats.moveMistakes[key] = (stats.moveMistakes[key] || 0) + 1;
+  getNodeStats(stats, currentMoveKey()).mistakes++;
   practiceState.helpedThisMove = true;
   savePracticeStats();
 
@@ -230,7 +229,7 @@ function savePracticeStats() {
 }
 
 // Names the move the user is on, by the course moves leading up to and including it,
-// e.g. "e4 e5 Nf3". Used to count mistakes per move.
+// e.g. "e4 e5 Nf3". Used to label each move's stats.
 function currentMoveKey() {
   // Version 1 has only one prepared move at each point, so take the first.
   return practiceState.path.concat(practiceState.nextMoves[0].move).join(" ");

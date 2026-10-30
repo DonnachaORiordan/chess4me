@@ -14,7 +14,12 @@ const BACKUP_FORMAT = "chess4me-backup";
 
 // Version of the saved data format. Increase it if the format ever changes,
 // so old data can be recognised and upgraded safely.
-const DATA_VERSION = 1;
+// Version 2 added per-position stats (stats.nodes) and dropped stats.moveMistakes.
+const DATA_VERSION = 2;
+
+// Before upgrading old data, an untouched copy of it is kept under this label, just in case.
+// e.g. "chess4me-data-v1-copy". Never change this.
+const OLD_DATA_COPY_KEY_START = STORAGE_KEY + "-v";
 
 // Settings used until the user changes them.
 const DEFAULT_SETTINGS = {
@@ -32,7 +37,8 @@ function makeCourseId() {
   return "course-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
 }
 
-// Empty performance stats for a new course (counting starts in a later step).
+// Empty performance stats for a new course.
+// (The names "timesPractised" and "lastPractised" keep their old spelling so saved data still matches.)
 function makeEmptyStats() {
   return {
     timesPractised: 0,   // practice sessions started
@@ -43,9 +49,28 @@ function makeEmptyStats() {
     correctFirstTry: 0,  // user's moves played correctly on the first try
     userMoves: 0,        // all of the user's moves (accuracy = correctFirstTry / userMoves)
     lastPractised: null, // date, or null if never practiced
-    moveMistakes: {}     // times each move was got wrong, keyed by the moves leading
-                         // to it, e.g. { "e4 e5 Nf3": 2 }
+    nodes: {}            // stats for each position in the move tree, labelled by the moves
+                         // leading to it, including its own move, e.g. "e4 e5 Nf3".
+                         // A position with no entry yet has all-zero stats (see getNodeStats).
   };
+}
+
+// Empty stats for one position (one move node) in the tree.
+function makeEmptyNodeStats() {
+  return {
+    reached: 0,          // times this move came up in practice
+    correctFirstTry: 0,  // user's move: played correctly with no mistakes or help
+    mistakes: 0,         // user's move: wrong moves tried here
+    hintsUsed: 0,        // user's move: hints used here
+    movesShown: 0        // user's move: times "Show move" was used here
+  };
+}
+
+// Returns the stats of one position, e.g. getNodeStats(course.stats, "e4 e5 Nf3"),
+// creating empty ones the first time, so they can be counted up straight away.
+function getNodeStats(stats, key) {
+  if (!stats.nodes[key]) stats.nodes[key] = makeEmptyNodeStats();
+  return stats.nodes[key];
 }
 
 // Makes one move for the move tree. "children" holds the possible next moves
@@ -155,12 +180,54 @@ function getData() {
 // ===== Functions the rest of the app uses =====
 
 // Runs once when the app starts. On first launch (nothing saved yet),
-// saves the example Italian Game course.
+// saves the example Italian Game course. If the saved data is from an older
+// version of the app, upgrades it.
 function initStorage() {
   const data = readData();
-  if (data === null && !storageBroken) {
+  if (storageBroken) return;
+
+  if (data === null) {
     writeData({ dataVersion: DATA_VERSION, courses: [makeExampleCourse()] });
+  } else if (typeof data.dataVersion === "number" && data.dataVersion < DATA_VERSION) {
+    upgradeSavedData(data);
   }
+}
+
+// ===== Upgrading old data =====
+
+// Upgrades the saved data to the current format, keeping a copy of the old data first.
+function upgradeSavedData(data) {
+  // 1. Keep an untouched copy of the old data (only the first time, so the original is never overwritten).
+  const copyKey = OLD_DATA_COPY_KEY_START + data.dataVersion + "-copy";
+  try {
+    if (localStorage.getItem(copyKey) === null) {
+      localStorage.setItem(copyKey, localStorage.getItem(STORAGE_KEY));
+    }
+  } catch (error) {
+    console.error("Couldn't keep a copy of the old data (upgrading anyway, courses are kept):", error);
+  }
+
+  // 2. Upgrade, check nothing was lost, and save.
+  const upgraded = upgradeData(data);
+  if (upgraded.courses.length !== data.courses.length) {
+    console.error("Upgrade stopped: the number of courses changed. The old data is left as it was.");
+    return;
+  }
+  writeData(upgraded);
+}
+
+// Returns an upgraded copy of saved data (or of a backup file's data).
+// Version 1 -> 2: every course keeps its id, name, colour, moves, comments and dates exactly.
+// Its stats are reset to zero, in the new format with per-position stats (the user chose this).
+function upgradeData(data) {
+  const upgraded = Object.assign({}, data); // keeps anything else, e.g. settings
+  if (data.dataVersion < 2) {
+    upgraded.courses = data.courses.map(function (course) {
+      return Object.assign({}, course, { stats: makeEmptyStats() });
+    });
+  }
+  upgraded.dataVersion = DATA_VERSION;
+  return upgraded;
 }
 
 // Returns a list of all courses.
@@ -234,7 +301,9 @@ function readBackup(text) {
   if (!isBackup) return null;
 
   if (!backup.courses.every(isValidCourse)) return null;
-  return backup.courses.map(tidyImportedCourse);
+
+  // A backup from an older version is upgraded the same way as saved data (stats reset).
+  return upgradeData(backup).courses.map(tidyImportedCourse);
 }
 
 // True if something looks like a proper course (name, colour and a valid move tree).
@@ -259,7 +328,7 @@ function isValidMoveNode(node) {
 function tidyImportedCourse(course) {
   const now = new Date().toISOString();
   const stats = Object.assign(makeEmptyStats(), (course.stats && typeof course.stats === "object") ? course.stats : {});
-  if (!stats.moveMistakes || typeof stats.moveMistakes !== "object") stats.moveMistakes = {};
+  if (!stats.nodes || typeof stats.nodes !== "object") stats.nodes = {};
 
   return {
     id: (typeof course.id === "string" && course.id) ? course.id : makeCourseId(),

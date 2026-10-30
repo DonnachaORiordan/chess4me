@@ -242,8 +242,8 @@ Each course has:
 - `stats` (section 9)
 - `created` and `updated` dates
 
-Include a version number in the saved data (e.g. `dataVersion: 1`) so the
-format can be upgraded safely later.
+Include a version number in the saved data (now `dataVersion: 2`, see
+section 21) so the format can be upgraded safely later.
 
 ### 8.3 Starting example
 On first launch (no saved data yet), create one example course:
@@ -267,8 +267,9 @@ Per course, track:
 - hints used and moves shown
 - accuracy: correct moves on the first try ÷ all the user's moves, as a %
 - date last practised
-- per move: how many times it was got wrong (for future "practise my weak
-  moves" features)
+- per move: how many times it was got wrong (for future "practice my weak
+  moves" features). Since dataVersion 2 this is part of the per-position
+  stats (section 20.1).
 
 On the main menu card, show a short summary, e.g. "Accuracy 86% · Practised 12
 times". Keep it subtle.
@@ -638,6 +639,18 @@ Keep it small and subtle.
 - Never lose courses or moves during the upgrade.
 - Before the first version 2 push, the user will export a backup from the
   home-screen app.
+- How it's stored (done in build step 2):
+  - Per-position stats live in the course's stats, as `stats.nodes`, labelled
+    by the moves leading to the position including its own move, e.g.
+    `"e4 e5 Nf3"`. They are NOT stored inside the move tree, because the
+    editor rebuilds the tree when a course is saved. Each entry has
+    `reached`, `correctFirstTry`, `mistakes`, `hintsUsed`, `movesShown`.
+    A position with no entry has all-zero stats.
+  - The old `stats.moveMistakes` is replaced by `stats.nodes[...].mistakes`.
+  - The course-level stat names keep their old spelling (`timesPractised`,
+    `lastPractised`), as they are saved data, not text the user sees.
+  - Before upgrading, storage.js keeps an untouched copy of the old data in
+    the browser's storage under `chess4me-data-v1-copy`, as a safety net.
 
 ---
 
