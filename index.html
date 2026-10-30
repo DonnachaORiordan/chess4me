@@ -45,19 +45,51 @@
     <input id="import-file" type="file" accept="application/json,.json" hidden>
   </section>
 
-  <!-- ===== Course page ===== -->
-  <section id="course-screen" class="screen screen-narrow" hidden>
-    <button id="course-back" class="back-button">&larr; Back</button>
+  <!-- ===== Course explorer (browsing a course; opened by tapping a course card) ===== -->
+  <section id="explorer-screen" class="screen" hidden>
+    <!-- Back on the left, course name and colour in the middle, sound on/off on the right -->
+    <div class="top-bar">
+      <button id="explorer-back" class="back-button">&larr; Back</button>
+      <h2 id="explorer-title" class="explorer-title"></h2>
+      <button id="explorer-sound" class="back-button sound-toggle" aria-label="Sound"></button>
+    </div>
 
-    <!-- Course name and colour (filled in by app.js) -->
-    <h2 id="course-name"></h2>
-    <p id="course-colour" class="course-colour"></p>
+    <!-- Same layout as practice mode -->
+    <div class="practice-layout">
+      <div id="explorer-board-area" class="board-area">
+        <!-- The board is moved here by explorer.js -->
 
-    <div class="button-row">
-      <button id="course-practice" class="button">Practice</button>
-      <button id="course-watch" class="button">Watch</button>
-      <button id="course-edit" class="button">Edit</button>
-      <button id="course-delete" class="button button-secondary">Delete</button>
+        <!-- The comment for the current move, if it has one (filled in by explorer.js) -->
+        <div id="explorer-comment" class="comment-box" hidden></div>
+      </div>
+
+      <div class="side-panel">
+        <!-- Start, Back one move, Forward one move (forward follows the main line) -->
+        <div class="button-row button-row-tight">
+          <button id="explorer-start" class="button arrow-button" aria-label="Start position" title="Start position">&laquo;</button>
+          <button id="explorer-prev" class="button arrow-button" aria-label="Back one move" title="Back one move">&lsaquo;</button>
+          <button id="explorer-next" class="button arrow-button" aria-label="Forward one move" title="Forward one move">&rsaquo;</button>
+        </div>
+
+        <!-- Stats for the current position (filled in by explorer.js) -->
+        <div id="explorer-stats" class="stats-box"></div>
+
+        <!-- The whole move tree: tap a move to jump there (filled in by explorer.js) -->
+        <div id="explorer-move-list" class="move-list"></div>
+
+        <!-- Main actions (big) -->
+        <div class="button-row">
+          <button id="explorer-practice" class="button">Practice all</button>
+          <!-- Temporary until build step 7 replaces it with "Watch this line" -->
+          <button id="explorer-watch" class="button">Watch</button>
+        </div>
+
+        <!-- Less-used actions (smaller) -->
+        <div class="button-row button-row-tight">
+          <button id="explorer-edit" class="button button-secondary button-small">Edit</button>
+          <button id="explorer-delete" class="button button-secondary button-small">Delete</button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -238,6 +270,7 @@
   <script src="js/watch.js"></script>
   <script src="js/editor.js"></script>
   <script src="js/backup.js"></script>
+  <script src="js/explorer.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

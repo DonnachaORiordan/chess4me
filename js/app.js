@@ -17,11 +17,6 @@ function makeColourBox(colour) {
   return box;
 }
 
-// "white" -> "White", "black" -> "Black"
-function colourName(colour) {
-  return colour === "white" ? "White" : "Black";
-}
-
 // ===== Move list =====
 // ALL move list drawing is here, so its look can easily be changed in one place.
 
@@ -34,10 +29,11 @@ function renderMoveList(listId, moves) {
 // Shows a whole move tree (a list of possible first moves, see storage.js), chess.com style:
 // the main line in rows ("1. e4 e5"), and side lines in brackets, indented under the move
 // where they split, e.g. "(3... Nf6 4. Ng5)". Side lines inside side lines are indented further.
-// "options" makes the moves tappable (the editor):
-//   options.onMoveTap(path) - called when a move is tapped, with the list of moves
-//                             (tree nodes) from the start up to and including it
+// "options" (all optional):
+//   options.onMoveTap(path) - makes moves tappable: called when a move is tapped, with the list
+//                             of moves (tree nodes) from the start up to and including it
 //   options.currentNode     - the move (tree node) to highlight
+//   options.moveClass(path) - returns an extra class for a move, e.g. its colour (see moveTintClass)
 function renderMoveTree(listId, tree, options) {
   const list = document.getElementById(listId);
   list.innerHTML = "";
@@ -129,11 +125,14 @@ function addMoveToList(container, node, path, options) {
     container = cell;
   }
 
+  const extraClass = options.moveClass ? options.moveClass(path) : "";
+
   if (!options.onMoveTap) {
-    addMoveText(container, node.move, "move");
+    addMoveText(container, node.move, "move" + (extraClass ? " " + extraClass : ""));
   } else {
     const button = document.createElement("button");
     button.className = "move-button";
+    if (extraClass) button.classList.add(extraClass);
     button.textContent = node.move;
     if (node === options.currentNode) button.classList.add("selected");
     if (node.comment && node.comment.trim() !== "") button.classList.add("has-comment");
@@ -144,6 +143,23 @@ function addMoveToList(container, node, path, options) {
   }
 
   if (node.name && node.name.trim() !== "") addMoveText(container, node.name.trim(), "line-name");
+}
+
+// The colour for one of the user's moves in the move list, by how often it was
+// played correctly first time: "tint-red", "tint-orange", "tint-yellow" or "tint-green".
+// Returns "" (no colour) for the opponent's moves and moves never practiced.
+// "key" names the move by the moves leading to it, e.g. "e4 e5 Nf3"; "ply" says whose
+// move it is (0 = White's first move); "colour" is the user's colour ("white" or "black").
+function moveTintClass(stats, key, ply, colour) {
+  const isUsersMove = (ply % 2 === 0) === (colour === "white");
+  const nodeStats = stats && stats.nodes && stats.nodes[key];
+  if (!isUsersMove || !nodeStats || nodeStats.reached === 0) return "";
+
+  const accuracy = 100 * nodeStats.correctFirstTry / nodeStats.reached;
+  if (accuracy < TINT_RED_BELOW) return "tint-red";
+  if (accuracy < TINT_ORANGE_BELOW) return "tint-orange";
+  if (accuracy < TINT_YELLOW_BELOW) return "tint-yellow";
+  return "tint-green";
 }
 
 // ===== Pop-up messages and questions =====
@@ -222,7 +238,7 @@ function renderCourseList() {
 }
 
 // Makes one course card: colour box on the left, then the course name
-// with a short stats summary below it. Tapping the card opens the course page.
+// with a short stats summary below it. Tapping the card opens the course explorer.
 function makeCourseCard(course) {
   const card = document.createElement("button");
   card.className = "course-card";
@@ -245,7 +261,7 @@ function makeCourseCard(course) {
   card.appendChild(text);
 
   card.addEventListener("click", function () {
-    showCoursePage(course.id);
+    showExplorer(course.id);
   });
   return card;
 }
@@ -265,57 +281,7 @@ function statsSummary(stats) {
   return parts.join(" · ");
 }
 
-// ===== Course page =====
-
-// The id of the course whose page is open.
-let currentCourseId = null;
-
-// Shows the page for one course.
-function showCoursePage(courseId) {
-  const course = getCourse(courseId);
-  if (!course) {
-    showMainMenu(); // the course no longer exists
-    return;
-  }
-  currentCourseId = courseId;
-
-  document.getElementById("course-name").textContent = course.name;
-
-  // Colour line, e.g. [white box] "You play White"
-  const colourLine = document.getElementById("course-colour");
-  colourLine.innerHTML = "";
-  colourLine.appendChild(makeColourBox(course.colour));
-  colourLine.appendChild(document.createTextNode("You play " + colourName(course.colour)));
-
-  showScreen("course-screen");
-}
-
-document.getElementById("course-back").addEventListener("click", showMainMenu);
-
-// "Practice": start practicing this course (see practice.js).
-document.getElementById("course-practice").addEventListener("click", function () {
-  startPractice(currentCourseId);
-});
-
-// "Watch": watch this course's line being played (see watch.js).
-document.getElementById("course-watch").addEventListener("click", function () {
-  startWatch(currentCourseId);
-});
-
-// "Edit": open this course in the editor (see editor.js).
-document.getElementById("course-edit").addEventListener("click", function () {
-  startEditor(currentCourseId);
-});
-
-// "Delete": asks first, then deletes the course and returns to the main menu.
-document.getElementById("course-delete").addEventListener("click", function () {
-  const course = getCourse(currentCourseId);
-  if (!course) return;
-  askConfirm("Delete " + course.name + "? This can't be undone.", "Delete", function () {
-    deleteCourse(course.id);
-    showMainMenu();
-  });
-});
+// (Tapping a course card opens the course explorer: see explorer.js.)
 
 // "New course" on the main menu: open an empty editor.
 document.getElementById("menu-new").addEventListener("click", function () {

@@ -51,7 +51,7 @@ function startPractice(courseId) {
   document.getElementById("practice-end").hidden = true;
   document.getElementById("practice-controls").hidden = false;
   showComment("practice-comment", "");
-  renderMoveList("practice-move-list", practiceState.played);
+  renderPracticeMoveList();
 
   // Show the board with the user's colour at the bottom.
   placeBoard(document.getElementById("practice-board-area"));
@@ -204,7 +204,7 @@ function acceptMove(node, move) {
   showMove(move);
   playSoundForMove(move);
   showComment("practice-comment", node.comment); // or hides the box if the move has no comment
-  renderMoveList("practice-move-list", practiceState.played);
+  renderPracticeMoveList();
   continuePractice();
 }
 
@@ -266,6 +266,21 @@ function showCorrectMove() {
   acceptMove(node, move); // (saves the stats)
 }
 
+// ===== Move list =====
+
+// Shows the moves played so far. The user's moves are colour-coded by how well they're known
+// (red to green, from the stats; see moveTintClass in app.js).
+function renderPracticeMoveList() {
+  const course = practiceState.course;
+  renderMoveTree("practice-move-list", lineToTree(practiceState.played), {
+    moveClass: function (path) {
+      const ply = path.length - 1;
+      const key = practiceState.path.slice(0, ply + 1).join(" ");
+      return moveTintClass(course.stats, key, ply, course.colour);
+    }
+  });
+}
+
 // ===== Stats =====
 
 // Saves the course's stats (see storage.js).
@@ -298,10 +313,10 @@ function setPracticeStatus(text) {
 
 // ===== Buttons on the practice screen =====
 
-// "← Back": return to the course page.
+// "← Back": return to the course explorer.
 document.getElementById("practice-back").addEventListener("click", function () {
   stopPractice();
-  showCoursePage(practiceState.course.id);
+  showExplorer(practiceState.course.id);
 });
 
 // "Hint" and "Show move"

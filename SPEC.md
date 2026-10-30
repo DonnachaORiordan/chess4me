@@ -74,6 +74,7 @@ chess4me/
     board.js        drawing the board and handling taps
     practice.js     practice mode
     editor.js       creating and editing courses
+    explorer.js     the course explorer (browsing a course, its stats and buttons)
     app.js          menus and moving between screens
   lib/              outside libraries (e.g. chess.js)
   assets/
@@ -132,7 +133,8 @@ Files can be split differently if there's a good reason, but explain why first.
 - Buttons: "Practice", "Watch", "Edit", "Delete".
 - Delete asks for confirmation first ("Delete Italian Game? This can't be
   undone.").
-- (Version 2: this becomes the course explorer, see section 19.)
+- REPLACED in version 2 (build step 6) by the course explorer, section 19
+  (`js/explorer.js`). Delete keeps the same confirmation there.
 
 ### 6.3 Course editor (creating or editing a course)
 - Fields: course name, and which colour the user plays (White/Black).
@@ -617,6 +619,12 @@ the course, not being tested.
 - Main actions are big, easy-to-tap buttons. Less-used ones (Edit, Delete)
   are smaller.
 - The user will try this layout and probably adjust it.
+- (Done in build step 6:) the explorer has "Practice all", a temporary
+  "Watch" (main line) until step 7 adds "Watch this line", and smaller
+  "Edit" and "Delete". The board is for looking only (taps do nothing).
+  Stats box: "Reached N times" (or "Practiced N times" at the start),
+  "This move: N mistakes · N hints · N shown" on the user's moves, and
+  "Accuracy from here" over all the user's moves after this point.
 
 ---
 
@@ -645,7 +653,8 @@ Keep it small and subtle.
   subtly by first-try accuracy: red (poorly known), through orange/yellow,
   to green (well known).
 - Moves never practiced have no tint. Opponent moves have no tint.
-- The thresholds are settings in config.js.
+- The thresholds are settings in config.js (TINT_RED_BELOW 50,
+  TINT_ORANGE_BELOW 70, TINT_YELLOW_BELOW 90; first-try accuracy in %).
 
 ---
 
@@ -698,7 +707,7 @@ part of step 1).
          (17.3).
 - [x] 5. Practice all with random branch choice, equal chance per line, no
          repeat (18.1, 18.2), recording per-node stats.
-- [ ] 6. Course explorer: board, arrows, move list, comments, stats box,
+- [x] 6. Course explorer: board, arrows, move list, comments, stats box,
          colour-coded moves (19, 20.2, 20.3). Replaces the course page.
 - [ ] 7. Explorer actions: Practice from here, Practice this line only,
          Watch this line (18.3, 19).

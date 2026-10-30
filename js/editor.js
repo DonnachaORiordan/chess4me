@@ -66,13 +66,6 @@ function removeIllegalMoves(choices, game) {
   return removed;
 }
 
-// Returns a new chess.js game with the given moves (tree nodes) played from the start.
-function gameAfter(path) {
-  const game = new Chess();
-  path.forEach(function (node) { game.move(node.move); });
-  return game;
-}
-
 // The current move (tree node), or null at the start position.
 function currentEditorNode() {
   const path = editorState.path;
@@ -349,7 +342,7 @@ function setEditorMessage(text) {
 
 // ===== Save and Cancel =====
 
-// "Save": checks the course is complete, saves it, and opens its course page.
+// "Save": checks the course is complete, saves it, and opens its course explorer.
 function saveEditor() {
   const name = document.getElementById("editor-name").value.trim();
   if (name === "") {
@@ -378,7 +371,7 @@ function saveEditor() {
     setEditorMessage("Sorry, the course couldn't be saved.");
     return;
   }
-  showCoursePage(course.id);
+  showExplorer(course.id);
 }
 
 // A clean copy of a move tree for saving: just the move, its comment (trimmed),
@@ -405,7 +398,7 @@ function cancelEditor() {
 // Goes back to where the editor was opened from.
 function leaveEditor() {
   if (editorState.courseId) {
-    showCoursePage(editorState.courseId);
+    showExplorer(editorState.courseId);
   } else {
     showMainMenu();
   }

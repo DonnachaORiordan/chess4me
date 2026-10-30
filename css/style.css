@@ -221,13 +221,6 @@ h2 {
   background-color: #222222;
 }
 
-/* ===== Course page ===== */
-.course-colour {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-}
 
 /* ===== Hint: a gently pulsing orange ring around the piece to move ===== */
 .hint {
@@ -295,6 +288,38 @@ h2 {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+/* ===== Course explorer ===== */
+
+/* Course name and colour box, in the middle of the top bar (cut short with "…" if too long) */
+.explorer-title {
+  flex: 1;
+  min-width: 0;
+  margin: 0 8px;
+  overflow: hidden;
+  font-size: 20px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.explorer-title .colour-box {
+  vertical-align: middle;
+}
+
+/* The small, subtle stats box for the current position */
+.stats-box {
+  margin: 0 0 12px;
+  color: #777777;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Smaller buttons for less-used actions (still 44px tall, so easy to tap) */
+.button-small {
+  padding: 0 14px;
+  font-size: 14px;
 }
 
 /* Sound on/off button: just an icon, with a tap area of at least 44 x 44 pixels */
@@ -400,6 +425,27 @@ h2 {
 .move-bracket {
   color: #999999;
 }
+
+/* Plain (not tappable) moves get the same rounded shape as move buttons, so a colour
+   tint looks the same; the negative margin keeps the text lined up as before */
+.move {
+  padding: 2px 6px;
+  margin-left: -6px;
+  border-radius: 6px;
+}
+
+.move-row .move,
+.move-row .move-button {
+  justify-self: start; /* the tint and highlight only cover the move, not the whole column */
+}
+
+/* The user's moves, colour-coded by first-try accuracy (thresholds in config.js).
+   Kept light so the list stays calm. ".move-list" in front makes these win over the move
+   buttons' plain background; the highlighted (current) move, defined later, still wins over them. */
+.move-list .tint-red    { background-color: rgba(214, 69, 69, 0.20); }
+.move-list .tint-orange { background-color: rgba(240, 150, 40, 0.24); }
+.move-list .tint-yellow { background-color: rgba(225, 195, 30, 0.28); }
+.move-list .tint-green  { background-color: rgba(63, 157, 79, 0.22); }
 
 /* A side line's name, shown after its first move, e.g. "3... Nf6 Two Knights Defence" */
 .line-name {

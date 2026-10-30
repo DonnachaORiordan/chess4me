@@ -110,6 +110,14 @@ function showGame(game, options) {
   updateBoard();
 }
 
+// Returns a new chess.js game with the given moves (move tree nodes, see storage.js)
+// played from the start. Used by the editor and the explorer to jump to any move.
+function gameAfter(path) {
+  const game = new Chess();
+  path.forEach(function (node) { game.move(node.move); });
+  return game;
+}
+
 // Locks the board (taps ignored) or unlocks it.
 function setBoardLocked(locked) {
   boardState.locked = locked;

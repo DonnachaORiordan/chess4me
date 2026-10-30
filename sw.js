@@ -11,7 +11,7 @@
 importScripts("js/config.js");
 
 // Change this number to throw away all saved copies and start fresh.
-const CACHE_VERSION = 9;
+const CACHE_VERSION = 10;
 const CACHE_NAME = APP_NAME.toLowerCase() + "-v" + CACHE_VERSION;
 
 // Every file the app needs, saved when the service worker is first installed.
@@ -30,6 +30,7 @@ const APP_FILES = [
   "js/watch.js",
   "js/editor.js",
   "js/backup.js",
+  "js/explorer.js",
   "js/app.js",
   "assets/pieces/wP.svg", "assets/pieces/wN.svg", "assets/pieces/wB.svg",
   "assets/pieces/wR.svg", "assets/pieces/wQ.svg", "assets/pieces/wK.svg",

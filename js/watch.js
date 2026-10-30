@@ -151,8 +151,8 @@ document.getElementById("watch-restart").addEventListener("click", function () {
   resetWatchPosition();
 });
 
-// "← Back": return to the course page.
+// "← Back": return to the course explorer.
 document.getElementById("watch-exit").addEventListener("click", function () {
   pauseWatch();
-  showCoursePage(watchState.course.id);
+  showExplorer(watchState.course.id);
 });
