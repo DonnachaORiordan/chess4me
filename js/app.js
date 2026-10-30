@@ -35,9 +35,29 @@ function renderMoveList(listId, moves) {
 //   options.currentNode     - the move (tree node) to highlight
 //   options.moveClass(path) - returns an extra class for a move, e.g. its colour (see moveTintClass)
 function renderMoveTree(listId, tree, options) {
+  options = options || {};
   const list = document.getElementById(listId);
   list.innerHTML = "";
-  writeMoveLine(list, tree, 0, [], true, options || {});
+  writeMoveLine(list, tree, 0, [], true, options);
+
+  // A long list scrolls inside its own box (see .move-list in style.css). Keep the
+  // current move in view: the highlighted move, or for practice/watch the latest move.
+  // (Done a moment later, once the screen is showing and the list has its size.)
+  requestAnimationFrame(function () {
+    if (!options.onMoveTap) {
+      list.scrollTop = list.scrollHeight; // practice / watch: show the latest moves
+      return;
+    }
+    const current = list.querySelector(".selected");
+    if (!current) {
+      list.scrollTop = 0; // at the start position: show the beginning
+      return;
+    }
+    const box = list.getBoundingClientRect();
+    const move = current.getBoundingClientRect();
+    if (move.top < box.top) list.scrollTop -= (box.top - move.top) + 8;
+    else if (move.bottom > box.bottom) list.scrollTop += (move.bottom - box.bottom) + 8;
+  });
 }
 
 // Writes one line of the tree into "container". "choices" are the possible moves at this
@@ -45,34 +65,49 @@ function renderMoveTree(listId, tree, options) {
 // one followed; any others are written as side lines underneath it.
 // "path" = the moves leading here. "isMain" = true for the main line (written in rows).
 function writeMoveLine(container, choices, ply, path, isMain, options) {
-  let row = null; // the row (main line) or stretch of text (side line) being written
+  let row = null;   // the row (main line) or stretch of text (side line) being written
+  let group = null; // side lines: the last move with its number, kept together (see below)
   let isFirst = true;
 
   while (choices.length > 0) {
     const node = choices[0];
     const isWhite = (ply % 2 === 0);
     const number = Math.floor(ply / 2) + 1;
+    const startsRow = !row;
 
     // Start a new row / stretch of text if needed.
     if (!row) {
       row = document.createElement("div");
       row.className = isMain ? "move-row" : "move-variation-text";
       container.appendChild(row);
-      if (!isMain && isFirst) addMoveText(row, "(", "move-bracket");
+    }
+
+    // In a side line, a move and its number (and an opening bracket) go in one "group",
+    // so a line break never separates "5." from "exd5" on a narrow screen.
+    let target = row;
+    if (!isMain) {
+      group = document.createElement("span");
+      group.className = "move-group";
+      row.appendChild(group);
+      target = group;
+    }
+
+    if (startsRow) {
+      if (!isMain && isFirst) addMoveText(target, "(", "move-bracket");
       if (!isWhite) {
         // Starts with Black's move: "3... Nf6" (side line), or "3." + "…" + "Nf6" (main line row)
         if (isMain) {
-          addMoveText(row, number + ".", "move-number");
-          addMoveText(row, "…", "move-number");
+          addMoveText(target, number + ".", "move-number");
+          addMoveText(target, "…", "move-number");
         } else {
-          addMoveText(row, number + "...", "move-number");
+          addMoveText(target, number + "...", "move-number");
         }
       }
     }
-    if (isWhite) addMoveText(row, number + ".", "move-number");
+    if (isWhite) addMoveText(target, number + ".", "move-number");
 
     const nodePath = path.concat(node);
-    addMoveToList(row, node, nodePath, options);
+    addMoveToList(target, node, nodePath, options);
     isFirst = false;
 
     // Main line: Black's move ends the row.
@@ -82,6 +117,7 @@ function writeMoveLine(container, choices, ply, path, isMain, options) {
     const sideLines = choices.slice(1);
     if (sideLines.length > 0) {
       row = null;
+      group = null;
       sideLines.forEach(function (side) {
         const box = document.createElement("div");
         box.className = "move-variation";
@@ -95,14 +131,16 @@ function writeMoveLine(container, choices, ply, path, isMain, options) {
     ply++;
   }
 
-  // Close a side line's bracket.
+  // Close a side line's bracket (kept with the last move, so it isn't left alone on a line).
   if (!isMain) {
-    if (!row) {
+    if (group) {
+      addMoveText(group, ")", "move-bracket");
+    } else {
       row = document.createElement("div");
       row.className = "move-variation-text";
       container.appendChild(row);
+      addMoveText(row, ")", "move-bracket");
     }
-    addMoveText(row, ")", "move-bracket");
   }
 }
 

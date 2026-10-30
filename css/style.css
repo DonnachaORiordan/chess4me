@@ -300,18 +300,31 @@ h2 {
 
 /* Course name and colour box, in the middle of the top bar (cut short with "…" if too long) */
 .explorer-title {
+  display: flex;
   flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   min-width: 0;
   margin: 0 8px;
-  overflow: hidden;
   font-size: 20px;
-  text-align: center;
+}
+
+/* The name is cut short with "…" if too long; the colour box beside it always shows */
+.explorer-title-name {
+  min-width: 0;
+  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.explorer-title .colour-box {
-  vertical-align: middle;
+/* Course name above the board in practice and watch: one line (cut short with "…"),
+   close under the top bar, so the board sits higher on a phone */
+.screen-title {
+  margin: 4px 0 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* The small, subtle stats box for the current position */
@@ -398,6 +411,12 @@ h2 {
 /* The move list (drawn by renderMoveTree in app.js) */
 .move-list {
   font-size: 16px;
+  /* A long move list scrolls inside its own box, so the buttons below it stay
+     close (section 17.4: on the iPhone the list scrolls below the board).
+     app.js keeps the current move in view. */
+  max-height: 45vh;
+  overflow-y: auto;
+  overscroll-behavior: contain; /* scrolling to the end of the list doesn't drag the page */
 }
 
 /* Main line rows: three columns (number, White's move, Black's move) */
@@ -424,8 +443,19 @@ h2 {
 }
 
 /* The moves of a side line flow along like text */
-.move-variation-text > * {
+.move-variation-text > *,
+.move-group > * {
   margin-right: 4px;
+}
+
+/* A move with its number stays together on one line ("5. exd5");
+   a long line name can still wrap */
+.move-group {
+  white-space: nowrap;
+}
+
+.move-group .line-name {
+  white-space: normal;
 }
 
 .move-variation .move-button {
@@ -467,7 +497,7 @@ h2 {
 }
 
 /* No gap after an opening bracket: "(3..." */
-.move-variation-text > .move-bracket:first-child {
+.move-group > .move-bracket:first-child {
   margin-right: 0;
 }
 
@@ -638,6 +668,7 @@ h2 {
 
 /* ===== "Are you sure?" pop-up ===== */
 .dialog {
+  box-sizing: border-box; /* the padding is inside the width, so it never touches the screen edge */
   width: calc(100% - 32px);
   max-width: 360px;
   padding: 20px;

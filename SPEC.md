@@ -111,6 +111,12 @@ Files can be split differently if there's a good reason, but explain why first.
   landscape). On an upright iPhone the board fills the screen width, so the
   move list goes directly BELOW the board.
 - Must include the viewport meta tag so it fits phone screens.
+- (Polish, build step 10:) long course names are cut short with "…" on one
+  line: in practice and watch the title sits just under the top bar (so the
+  board is higher), and in the explorer the colour box always shows next to
+  the name. Pop-up questions keep a gap from both screen edges. Checked at
+  iPhone widths 390px and 375px: every button and move is at least 44px
+  tall, and nothing is wider than the screen.
 
 ---
 
@@ -538,6 +544,11 @@ version so the iPhone picks up the update.
 - On the iPhone, the list scrolls below the board if it gets long.
 - The user may want to try a simpler "current line only" view later; keep the
   move list code in one place so it's easy to change.
+- (Done in build step 10:) the move list is at most 45% of the screen
+  height and scrolls inside its own box (on every screen); the current move
+  (or, in practice and watch, the latest move) is kept in view. In side
+  lines a move stays on the same line as its number ("5. exd5"), and the
+  closing bracket stays with the last move.
 
 ---
 

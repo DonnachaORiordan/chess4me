@@ -19,9 +19,13 @@ function showExplorer(courseId) {
   explorerState.path = [];
   explorerState.game = new Chess();
 
-  // Title: course name, then its colour box.
+  // Title: course name (cut short with "…" if too long), then its colour box.
   const title = document.getElementById("explorer-title");
-  title.textContent = course.name + " ";
+  title.innerHTML = "";
+  const name = document.createElement("span");
+  name.className = "explorer-title-name";
+  name.textContent = course.name;
+  title.appendChild(name);
   title.appendChild(makeColourBox(course.colour));
 
   placeBoard(document.getElementById("explorer-board-area"));
