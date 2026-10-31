@@ -6,12 +6,17 @@
 // - Online: always fetch the newest file, and keep a copy of it.
 // - Offline: hand out the saved copy instead.
 // So updates still reach the phone straight away whenever it's online.
+//
+// "Newest" really means newest: the site (GitHub Pages) lets browsers reuse a file for
+// 10 minutes without asking, so right after an update a phone could mix NEW and OLD
+// files, which breaks the app. So every request here asks the server first
+// ("no-cache" = check with the server; quick, as unchanged files aren't sent again).
 
 // Load APP_NAME from config.js, so the name stays in one place.
 importScripts("js/config.js");
 
 // Change this number to throw away all saved copies and start fresh.
-const CACHE_VERSION = 17;
+const CACHE_VERSION = 18;
 const CACHE_NAME = APP_NAME.toLowerCase() + "-v" + CACHE_VERSION;
 
 // Every file the app needs, saved when the service worker is first installed.
@@ -43,10 +48,15 @@ const APP_FILES = [
 ];
 
 // Install: save a copy of every app file, then take over straight away.
+// ("reload" = always download fresh from the server, never an old copy the browser kept.)
 self.addEventListener("install", function (event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(function (cache) { return cache.addAll(APP_FILES); })
+      .then(function (cache) {
+        return cache.addAll(APP_FILES.map(function (file) {
+          return new Request(file, { cache: "reload" });
+        }));
+      })
       .then(function () { return self.skipWaiting(); })
   );
 });
@@ -73,7 +83,9 @@ self.addEventListener("fetch", function (event) {
   if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
 
   event.respondWith(
-    fetch(request)
+    // Ask the server for this file's newest version (see the note at the top).
+    // (By its address, as a page request itself can't be given extra options.)
+    fetch(request.url, { cache: "no-cache" })
       .then(function (response) {
         // Got the newest file: update the saved copy, then hand it to the page.
         if (response.ok) {

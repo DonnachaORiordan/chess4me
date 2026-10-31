@@ -316,6 +316,13 @@ the first practice). Keep it subtle.
 - Offline support with a service worker. Do this as one of the LAST steps of
   version 1, because caching can make testing confusing. Make sure updates
   reach the phone (use a version number in the cache name).
+- (Fixed during build step 10:) GitHub Pages lets browsers reuse a file for
+  10 minutes, so straight after the first version 2 push the iPhone mixed a
+  NEW index.html with OLD JavaScript files: the app stopped part-way through
+  loading (no course list, New course dead, version 2 backups refused). The
+  service worker now asks the server for every file ("no-cache") and saves
+  fresh copies when installing ("reload"), so all files are always from the
+  same version when online.
 - Hosting: GitHub Pages, from a PUBLIC GitHub repo. Never put passwords, keys
   or personal information in the code.
 
