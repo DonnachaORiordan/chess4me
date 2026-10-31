@@ -760,7 +760,7 @@ part of step 1).
          Watch this line (18.3, 19).
 - [x] 8. Cover every line (18.4).
 - [x] 9. Practice weak spots (18.5) and the new course card summary (20.1).
-- [ ] 10. Polish pass on the iPhone (spacing, tap sizes, long move lists,
+- [x] 10. Polish pass on the iPhone (spacing, tap sizes, long move lists,
           smoothness), bump the service worker version, final push.
 
 Tick a step ONLY after the user confirms it works.
@@ -769,21 +769,21 @@ Tick a step ONLY after the user confirms it works.
 
 ## 23. Checklist: version 2 is done when…
 
-- [ ] Moves sound like wood; captures, checks and checkmates have their own
+- [x] Moves sound like wood; captures, checks and checkmates have their own
       sounds, and all can be muted with the sound icon.
-- [ ] Checkmate shows the skull icon beside the king and ends the game.
-- [ ] The board shows coordinates, flipped correctly when I play Black.
-- [ ] The app replies after 1.5 seconds; watch waits 1.5 seconds first.
-- [ ] All text says "practice"/"practiced".
-- [ ] My existing courses survived the upgrade (stats reset to zero).
-- [ ] In the editor I can jump to any move, add side lines for the
+- [x] Checkmate shows the skull icon beside the king and ends the game.
+- [x] The board shows coordinates, flipped correctly when I play Black.
+- [x] The app replies after 1.5 seconds; watch waits 1.5 seconds first.
+- [x] All text says "practice"/"practiced".
+- [x] My existing courses survived the upgrade (stats reset to zero).
+- [x] In the editor I can jump to any move, add side lines for the
       opponent, promote, delete and name lines.
-- [ ] Practice picks random lines, each with an equal chance.
-- [ ] The explorer lets me browse the tree, see stats per position, and see
+- [x] Practice picks random lines, each with an equal chance.
+- [x] The explorer lets me browse the tree, see stats per position, and see
       my moves colour-coded from red to green.
-- [ ] I can pick a line in the explorer and use Practice lines through here,
+- [x] I can pick a line in the explorer and use Practice lines through here,
       Practice this line only and Watch this line.
-- [ ] Cover every line goes through each line once.
-- [ ] Practice weak spots drills the moves I get wrong.
-- [ ] Export and import still work, including old version 1 backups.
-- [ ] It all works on my iPhone home-screen app, offline.
+- [x] Cover every line goes through each line once.
+- [x] Practice weak spots drills the moves I get wrong.
+- [x] Export and import still work, including old version 1 backups.
+- [x] It all works on my iPhone home-screen app, offline.
